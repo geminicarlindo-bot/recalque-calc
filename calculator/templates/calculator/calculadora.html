@@ -65,10 +65,6 @@
                     <label>Comprimento Real (m):</label>
                     <input type="number" step="any" name="comp_real_suc_m" required value="{{ dados_entrada.comp_real_suc_m }}">
                 </div>
-                <div>
-                    <label>Comprimento Equivalente (m):</label>
-                    <input type="number" step="any" name="comp_equiv_suc_m" required value="{{ dados_entrada.comp_equiv_suc_m }}">
-                </div>
             </fieldset>
             
             <fieldset>
@@ -81,9 +77,28 @@
                     <label>Comprimento Real (m):</label>
                     <input type="number" step="any" name="comp_real_rec_m" required value="{{ dados_entrada.comp_real_rec_m }}">
                 </div>
-                 <div>
-                    <label>Comprimento Equivalente (m):</label>
-                    <input type="number" step="any" name="comp_equiv_rec_m" required value="{{ dados_entrada.comp_equiv_rec_m }}">
+            </fieldset>
+            <fieldset>
+                <legend>Peças e Acessórios</legend>
+                <div class="grid-container">
+                    <div>
+                        <h4>Sucção</h4>
+                        {% for peca in pecas %}
+                        <div>
+                            <label for="peca_suc_{{ peca.id }}">{{ peca.nome }}:</label>
+                            <input type="number" name="peca_suc_{{ peca.id }}" value="0" min="0">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <h4>Recalque</h4>
+                        {% for peca in pecas %}
+                        <div>
+                            <label for="peca_rec_{{ peca.id }}">{{ peca.nome }}:</label>
+                            <input type="number" name="peca_rec_{{ peca.id }}" value="0" min="0">
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </fieldset>
         </div>
@@ -115,7 +130,9 @@
             <h3>Análise da Sucção</h3>
             <ul>
                 <li><span>J Unitário (m/m):</span> <strong>{{ resultados.j_suc_m_por_m|floatformat:5 }}</strong></li>
-                <li><span>Perda de Carga (m):</span> <strong>{{ resultados.delta_h_suc_m|floatformat:2 }}</strong></li>
+                <li><span>Comp. Equivalente (m):</span> <strong>{{ resultados.comp_equiv_suc_m|floatformat:2 }}</strong></li>
+                <li><span>Perda de Carga Total (m):</span> <strong>{{ resultados.delta_h_suc_m|floatformat:2 }}</strong></li>
+                <hr>
                 <li><span>H. Manométrica Sucção (m):</span> <strong>{{ resultados.h_man_suc_m|floatformat:2 }}</strong></li>
             </ul>
         </div>
@@ -123,7 +140,9 @@
             <h3>Análise do Recalque</h3>
             <ul>
                 <li><span>J Unitário (m/m):</span> <strong>{{ resultados.j_rec_m_por_m|floatformat:5 }}</strong></li>
-                <li><span>Perda de Carga (m):</span> <strong>{{ resultados.delta_h_rec_m|floatformat:2 }}</strong></li>
+                <li><span>Comp. Equivalente (m):</span> <strong>{{ resultados.comp_equiv_rec_m|floatformat:2 }}</strong></li>
+                <li><span>Perda de Carga Total (m):</span> <strong>{{ resultados.delta_h_rec_m|floatformat:2 }}</strong></li>
+                <hr>
                 <li><span>H. Manométrica Recalque (m):</span> <strong>{{ resultados.h_man_rec_m|floatformat:2 }}</strong></li>
             </ul>
         </div>

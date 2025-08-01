@@ -23,3 +23,24 @@ class Tubulacao(models.Model):
 
     def __str__(self):
         return f"{self.material.nome} - DN {self.diametro_nominal} ({self.diametro_interno_mm}mm interno)"
+
+class Peca(models.Model):
+    """Representa um tipo de conexão ou acessório. Ex: Curva de 90°, Válvula de Gaveta."""
+    nome = models.CharField(max_length=100, unique=True)
+    descricao = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.nome
+
+class ComprimentoEquivalente(models.Model):
+    """Tabela de consulta que relaciona uma Peça e uma Tubulação a um valor de Leq."""
+    peca = models.ForeignKey(Peca, on_delete=models.CASCADE)
+    tubulacao = models.ForeignKey(Tubulacao, on_delete=models.CASCADE)
+    comprimento_m = models.FloatField(help_text="Comprimento equivalente (Leq) em metros")
+
+    class Meta:
+        # Garante que só existe um valor de Leq por combinação de peça e tubulação
+        unique_together = ('peca', 'tubulacao')
+
+    def __str__(self):
+        return f"Leq para '{self.peca.nome}' em '{self.tubulacao}' é {self.comprimento_m}m"
