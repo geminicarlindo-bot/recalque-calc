@@ -44,7 +44,17 @@
                     <input type="number" step="0.01" min="0.1" max="1.0" name="rendimento_bomba" required value="{{ dados_entrada.rendimento_bomba|default:0.5 }}">
                 </div>
             </fieldset>
-
+            <fieldset>
+                <legend>Material da Tubulação</legend>
+                <select name="material" required>
+                    <option value="">--- Escolha um material ---</option>
+                    {% for material in materiais %}
+                        <option value="{{ material.id }}" {% if dados_entrada.material == material.id|stringformat:"s" %}selected{% endif %}>
+                            {{ material.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </fieldset>
             <fieldset>
                 <legend>Tubulação de Sucção</legend>
                 <div>
@@ -93,8 +103,12 @@
             <ul>
                 <li><span>Vazão (m³/h):</span> <strong>{{ resultados.q_m3_h|floatformat:2 }}</strong></li>
                 <li><span>Ø Recalque Calculado (mm):</span> <strong>{{ resultados.dr_calculado_mm|floatformat:2 }}</strong></li>
-                <li><span>Ø Recalque Comercial (mm):</span> <strong>{{ resultados.dr_comercial_mm }}</strong></li>
-                <li><span>Ø Sucção Comercial (mm):</span> <strong>{{ resultados.ds_comercial_mm }}</strong></li>
+                <hr>
+                <li><span>Ø Recalque Adotado (Nominal):</span> <strong>{{ resultados.dr_nominal }}</strong></li>
+                <li><span>Ø Recalque Interno (mm):</span> <strong>{{ resultados.dr_comercial_mm|floatformat:2 }}</strong></li>
+                <hr>
+                <li><span>Ø Sucção Adotado (Nominal):</span> <strong>{{ resultados.ds_nominal }}</strong></li>
+                <li><span>Ø Sucção Interno (mm):</span> <strong>{{ resultados.ds_comercial_mm|floatformat:2 }}</strong></li>
             </ul>
         </div>
         <div class="results-box">

@@ -1,6 +1,7 @@
 # calculator/engine.py
 
 import numpy as np
+from .models import Tubulacao # Importe o modelo
 
 # ===================================================================
 # CONSTANTES FÍSICAS
@@ -101,11 +102,10 @@ def dimensionar_sistema_completo(
     altura_geo_rec_m: float,
     comp_real_suc_m: float,
     comp_real_rec_m: float,
-    # Comprimentos equivalentes podem ser calculados a partir das peças,
-    # ou inseridos diretamente. Vamos começar com a inserção direta.
     comp_equiv_suc_m: float,
     comp_equiv_rec_m: float,
-    rendimento_bomba: float
+    rendimento_bomba: float,
+    material_id: int  # <-- PARÂMETRO ADICIONADO AQUI
 ) -> dict:
     """
     Implementa o roteiro completo de dimensionamento, com verificação
@@ -115,16 +115,18 @@ def dimensionar_sistema_completo(
     dados_vazao = _calcular_vazao(consumo_diario_litros, horas_funcionamento)
     
     # 2. Dimensionar Diâmetros
-    dados_diametros = _dimensionar_diametros(dados_vazao['q_m3_s'], horas_funcionamento)
-    
+    # Agora passamos o material_id para a função auxiliar
+    dados_diametros = _dimensionar_diametros(
+        vazao_m3s=dados_vazao['q_m3_s'],
+        horas_funcionamento=horas_funcionamento,
+        material_id=material_id  # <-- ARGUMENTO PASSADO AQUI
+    ) 
     # --- NOVA VERIFICAÇÃO INTELIGENTE ---
     # Antes de prosseguir, verificamos se um diâmetro foi encontrado.
     if dados_diametros.get('dr_comercial_mm') is None:
         dr_calculado = dados_diametros.get('dr_calculado_mm', 0)
-        # Geramos um erro específico que nossa view vai capturar!
-        raise ValueError(f"A vazão é muito alta. O diâmetro calculado ({dr_calculado:.1f} mm) excede os diâmetros comerciais disponíveis em nossa lista.")
+        raise ValueError(f"A vazão é muito alta. O diâmetro calculado ({dr_calculado:.1f} mm) excede os diâmetros comerciais disponíveis.")
         
-    # 3. Calcular H_manométrica
     lt_suc = comp_real_suc_m + comp_equiv_suc_m
     lt_rec = comp_real_rec_m + comp_equiv_rec_m
     dados_hman = _calcular_h_manometrica(
@@ -137,14 +139,12 @@ def dimensionar_sistema_completo(
         lt_rec=lt_rec
     )
     
-    # 4. Calcular Potência
     dados_potencia = _calcular_potencia_bomba(
         vazao_m3s=dados_vazao['q_m3_s'],
         h_man_total=dados_hman['h_man_total_m'],
         rendimento=rendimento_bomba
     )
     
-    # 5. Juntar todos os dicionários de resultados em um só para retornar
     resultados_finais = {
         **dados_vazao,
         **dados_diametros,
@@ -168,41 +168,43 @@ def _calcular_vazao(consumo_diario_litros: float, horas_funcionamento: float) ->
         "q_m3_h": q_m3_h,
         "q_m3_s": q_m3_s
     }
-
-def _dimensionar_diametros(vazao_m3s: float, horas_funcionamento: float) -> dict:
-    """Calcula o diâmetro de recalque pela fórmula de Forchheimer e
-    seleciona os diâmetros comerciais para recalque e sucção."""
+def _dimensionar_diametros(vazao_m3s: float, horas_funcionamento: float, material_id: int) -> dict:
+    """Calcula o diâmetro teórico e busca na base de dados a tubulação
+    comercial correspondente para o material escolhido."""
     
-    # Lista de diâmetros comerciais em mm (pode ser expandida)
-    DIAMETROS_COMERCIAIS_MM = [20, 25, 32, 40, 50, 60, 75, 85, 110, 125, 150, 175, 200, 250, 300]
+    # Lista de diâmetros foi movida para o banco de dados, esta linha pode ser removida se ainda existir.
     
-    if horas_funcionamento == 0:
-        return {}
-    
-    # Cálculo pela fórmula de Forchheimer
+    # Código para calcular o diametro_recalque_calculado_mm continua o mesmo...
     X = horas_funcionamento / 24.0
-    diametro_recalque_calculado_m = 1.3 * (vazao_m3s**0.5) * (X)**0.25
-    
-    # Converte para mm para comparar com a lista
+    diametro_recalque_calculado_m = 1.3 * (vazao_m3s**0.5) * (X)**0.25 # Usando sua fórmula corrigida
     diametro_recalque_calculado_mm = diametro_recalque_calculado_m * 1000
     
-    # Encontra o diâmetro comercial de RECALQUE (o primeiro da lista que é >= ao calculado)
-    dr_comercial_mm = next((d for d in DIAMETROS_COMERCIAIS_MM if d >= diametro_recalque_calculado_mm), None)
-    
-    # Encontra o diâmetro comercial de SUCÇÃO (o próximo na lista após o de recalque)
-    try:
-        indice_dr = DIAMETROS_COMERCIAIS_MM.index(dr_comercial_mm)
-        if indice_dr + 1 < len(DIAMETROS_COMERCIAIS_MM):
-            ds_comercial_mm = DIAMETROS_COMERCIAIS_MM[indice_dr + 1]
-        else:
-            ds_comercial_mm = dr_comercial_mm # Se for o último, repete
-    except (ValueError, TypeError):
-        ds_comercial_mm = None # Caso dr_comercial_mm não seja encontrado
+    # Lógica de busca no banco continua a mesma...
+    tubulacao_recalque = Tubulacao.objects.filter(
+        material_id=material_id,
+        diametro_interno_mm__gte=diametro_recalque_calculado_mm
+    ).order_by('diametro_interno_mm').first()
 
+    if not tubulacao_recalque:
+        raise ValueError(f"Não foi encontrada tubulação comercial para o diâmetro calculado de {diametro_recalque_calculado_mm:.2f}mm no material selecionado.")
+
+    tubulacao_succao = Tubulacao.objects.filter(
+        material_id=material_id,
+        diametro_interno_mm__gt=tubulacao_recalque.diametro_interno_mm
+    ).order_by('diametro_interno_mm').first()
+    
+    if not tubulacao_succao:
+        tubulacao_succao = tubulacao_recalque
+
+    # --- MUDANÇA PRINCIPAL AQUI ---
+    # Agora retornamos tanto o diâmetro interno (para os cálculos)
+    # quanto o diâmetro nominal (para exibição).
     return {
         "dr_calculado_mm": diametro_recalque_calculado_mm,
-        "dr_comercial_mm": dr_comercial_mm,
-        "ds_comercial_mm": ds_comercial_mm
+        "dr_comercial_mm": tubulacao_recalque.diametro_interno_mm, # Diâmetro interno para cálculos
+        "dr_nominal": tubulacao_recalque.diametro_nominal,     # Diâmetro nominal para exibição
+        "ds_comercial_mm": tubulacao_succao.diametro_interno_mm, # Diâmetro interno para cálculos
+        "ds_nominal": tubulacao_succao.diametro_nominal,      # Diâmetro nominal para exibição
     }
 
 def _calcular_j_fair_whipple(vazao_m3s: float, diametro_m: float) -> float:
