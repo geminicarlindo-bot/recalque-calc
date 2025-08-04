@@ -1,0 +1,41 @@
+{% extends "calculator/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Catálogo de Comprimentos Equivalentes (Leq)</h2>
+    <a href="{% url 'leq_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Adicionar Novo Leq
+    </a>
+</div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Peça</th>
+                    <th>Tubulação (Material - DN)</th>
+                    <th>Comprimento Equivalente (m)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leq in comprimentos_equivalentes %}
+                <tr>
+                    <td>{{ leq.peca.nome }}</td>
+                    <td>{{ leq.tubulacao }}</td>
+                    <td>{{ leq.comprimento_m }}</td>
+                    <td>
+                        <a href="{% url 'leq_update' leq.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <a href="{% url 'leq_delete' leq.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Nenhum comprimento equivalente cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

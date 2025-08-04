@@ -1,0 +1,136 @@
+material_nome,peca_nome,diametro_nominal,leq_metros
+PVC Soldável,Joelho 90°,20mm (1/2"),1.1
+PVC Soldável,Joelho 45°,20mm (1/2"),0.4
+PVC Soldável,Curva 90°,20mm (1/2"),0.4
+PVC Soldável,Curva 45°,20mm (1/2"),0.2
+PVC Soldável,Tê 90° Passagem Direta,20mm (1/2"),0.7
+PVC Soldável,Tê 90° Saída Bilateral,20mm (1/2"),2.3
+PVC Soldável,Tê 90° Saída Normal,20mm (1/2"),2.3
+PVC Soldável,Entrada de Borda,20mm (1/2"),0.9
+PVC Soldável,Saída de Canalização,20mm (1/2"),0.8
+PVC Soldável,Válvula de Pé e Crivo,20mm (1/2"),8.1
+PVC Soldável,Válvula de Retenção Tipo Leve,20mm (1/2"),2.5
+PVC Soldável,Válvula de Retenção Tipo Pesado,20mm (1/2"),3.6
+PVC Soldável,Registro de Globo Aberto,20mm (1/2"),11.1
+PVC Soldável,Registro de Gaveta Aberto,20mm (1/2"),0.1
+PVC Soldável,Registro de Ângulo Aberto,20mm (1/2"),5.9
+PVC Soldável,Joelho 90°,25mm (3/4"),1.2
+PVC Soldável,Joelho 45°,25mm (3/4"),0.5
+PVC Soldável,Curva 90°,25mm (3/4"),0.5
+PVC Soldável,Curva 45°,25mm (3/4"),0.3
+PVC Soldável,Tê 90° Passagem Direta,25mm (3/4"),0.8
+PVC Soldável,Tê 90° Saída Bilateral,25mm (3/4"),2.4
+PVC Soldável,Tê 90° Saída Normal,25mm (3/4"),2.4
+PVC Soldável,Entrada de Borda,25mm (3/4"),1.0
+PVC Soldável,Saída de Canalização,25mm (3/4"),0.9
+PVC Soldável,Válvula de Pé e Crivo,25mm (3/4"),9.5
+PVC Soldável,Válvula de Retenção Tipo Leve,25mm (3/4"),2.7
+PVC Soldável,Válvula de Retenção Tipo Pesado,25mm (3/4"),4.1
+PVC Soldável,Registro de Globo Aberto,25mm (3/4"),11.4
+PVC Soldável,Registro de Gaveta Aberto,25mm (3/4"),0.2
+PVC Soldável,Registro de Ângulo Aberto,25mm (3/4"),6.1
+PVC Soldável,Joelho 90°,32mm (1"),1.5
+PVC Soldável,Joelho 45°,32mm (1"),0.7
+PVC Soldável,Curva 90°,32mm (1"),0.6
+PVC Soldável,Curva 45°,32mm (1"),0.4
+PVC Soldável,Tê 90° Passagem Direta,32mm (1"),0.9
+PVC Soldável,Tê 90° Saída Bilateral,32mm (1"),3.1
+PVC Soldável,Tê 90° Saída Normal,32mm (1"),3.1
+PVC Soldável,Entrada de Borda,32mm (1"),1.2
+PVC Soldável,Saída de Canalização,32mm (1"),1.3
+PVC Soldável,Válvula de Pé e Crivo,32mm (1"),13.3
+PVC Soldável,Válvula de Retenção Tipo Leve,32mm (1"),3.8
+PVC Soldável,Válvula de Retenção Tipo Pesado,32mm (1"),5.8
+PVC Soldável,Registro de Globo Aberto,32mm (1"),15.0
+PVC Soldável,Registro de Gaveta Aberto,32mm (1"),0.3
+PVC Soldável,Registro de Ângulo Aberto,32mm (1"),8.4
+PVC Soldável,Joelho 90°,40mm (1 1/4"),2.0
+PVC Soldável,Joelho 45°,40mm (1 1/4"),1.0
+PVC Soldável,Curva 90°,40mm (1 1/4"),0.7
+PVC Soldável,Curva 45°,40mm (1 1/4"),0.5
+PVC Soldável,Tê 90° Passagem Direta,40mm (1 1/4"),1.5
+PVC Soldável,Tê 90° Saída Bilateral,40mm (1 1/4"),4.6
+PVC Soldável,Tê 90° Saída Normal,40mm (1 1/4"),4.6
+PVC Soldável,Entrada de Borda,40mm (1 1/4"),1.8
+PVC Soldável,Saída de Canalização,40mm (1 1/4"),1.4
+PVC Soldável,Válvula de Pé e Crivo,40mm (1 1/4"),15.5
+PVC Soldável,Válvula de Retenção Tipo Leve,40mm (1 1/4"),4.9
+PVC Soldável,Válvula de Retenção Tipo Pesado,40mm (1 1/4"),7.4
+PVC Soldável,Registro de Globo Aberto,40mm (1 1/4"),22.0
+PVC Soldável,Registro de Gaveta Aberto,40mm (1 1/4"),0.4
+PVC Soldável,Registro de Ângulo Aberto,40mm (1 1/4"),10.5
+PVC Soldável,Joelho 90°,50mm (1 1/2"),3.2
+PVC Soldável,Joelho 45°,50mm (1 1/2"),1.3
+PVC Soldável,Curva 90°,50mm (1 1/2"),1.2
+PVC Soldável,Curva 45°,50mm (1 1/2"),0.6
+PVC Soldável,Tê 90° Passagem Direta,50mm (1 1/2"),2.2
+PVC Soldável,Tê 90° Saída Bilateral,50mm (1 1/2"),7.3
+PVC Soldável,Tê 90° Saída Normal,50mm (1 1/2"),7.3
+PVC Soldável,Entrada de Borda,50mm (1 1/2"),1.0
+PVC Soldável,Saída de Canalização,50mm (1 1/2"),3.2
+PVC Soldável,Válvula de Pé e Crivo,50mm (1 1/2"),18.3
+PVC Soldável,Válvula de Retenção Tipo Leve,50mm (1 1/2"),6.8
+PVC Soldável,Válvula de Retenção Tipo Pesado,50mm (1 1/2"),9.1
+PVC Soldável,Registro de Globo Aberto,50mm (1 1/2"),35.8
+PVC Soldável,Registro de Gaveta Aberto,50mm (1 1/2"),0.7
+PVC Soldável,Registro de Ângulo Aberto,50mm (1 1/2"),17.0
+PVC Soldável,Joelho 90°,60mm (2"),3.4
+PVC Soldável,Joelho 45°,60mm (2"),1.5
+PVC Soldável,Curva 90°,60mm (2"),1.3
+PVC Soldável,Curva 45°,60mm (2"),0.7
+PVC Soldável,Tê 90° Passagem Direta,60mm (2"),2.3
+PVC Soldável,Tê 90° Saída Bilateral,60mm (2"),7.6
+PVC Soldável,Tê 90° Saída Normal,60mm (2"),7.6
+PVC Soldável,Entrada de Borda,60mm (2"),1.5
+PVC Soldável,Saída de Canalização,60mm (2"),2.8
+PVC Soldável,Válvula de Pé e Crivo,60mm (2"),23.7
+PVC Soldável,Válvula de Retenção Tipo Leve,60mm (2"),7.1
+PVC Soldável,Válvula de Retenção Tipo Pesado,60mm (2"),10.8
+PVC Soldável,Registro de Globo Aberto,60mm (2"),37.9
+PVC Soldável,Registro de Gaveta Aberto,60mm (2"),0.8
+PVC Soldável,Registro de Ângulo Aberto,60mm (2"),18.5
+PVC Soldável,Joelho 90°,75mm (2 1/2"),3.7
+PVC Soldável,Joelho 45°,75mm (2 1/2"),1.7
+PVC Soldável,Curva 90°,75mm (2 1/2"),1.4
+PVC Soldável,Curva 45°,75mm (2 1/2"),0.8
+PVC Soldável,Tê 90° Passagem Direta,75mm (2 1/2"),2.4
+PVC Soldável,Tê 90° Saída Bilateral,75mm (2 1/2"),7.8
+PVC Soldável,Tê 90° Saída Normal,75mm (2 1/2"),7.8
+PVC Soldável,Entrada de Borda,75mm (2 1/2"),1.6
+PVC Soldável,Saída de Canalização,75mm (2 1/2"),3.5
+PVC Soldável,Válvula de Pé e Crivo,75mm (2 1/2"),25.0
+PVC Soldável,Válvula de Retenção Tipo Leve,75mm (2 1/2"),8.2
+PVC Soldável,Válvula de Retenção Tipo Pesado,75mm (2 1/2"),12.5
+PVC Soldável,Registro de Globo Aberto,75mm (2 1/2"),38.0
+PVC Soldável,Registro de Gaveta Aberto,75mm (2 1/2"),0.9
+PVC Soldável,Registro de Ângulo Aberto,75mm (2 1/2"),19.0
+PVC Soldável,Joelho 90°,85mm (3"),3.9
+PVC Soldável,Joelho 45°,85mm (3"),1.8
+PVC Soldável,Curva 90°,85mm (3"),1.5
+PVC Soldável,Curva 45°,85mm (3"),0.9
+PVC Soldável,Tê 90° Passagem Direta,85mm (3"),2.5
+PVC Soldável,Tê 90° Saída Bilateral,85mm (3"),8.0
+PVC Soldável,Tê 90° Saída Normal,85mm (3"),8.0
+PVC Soldável,Entrada de Borda,85mm (3"),2.0
+PVC Soldável,Saída de Canalização,85mm (3"),3.7
+PVC Soldável,Válvula de Pé e Crivo,85mm (3"),26.8
+PVC Soldável,Válvula de Retenção Tipo Leve,85mm (3"),9.3
+PVC Soldável,Válvula de Retenção Tipo Pesado,85mm (3"),14.2
+PVC Soldável,Registro de Globo Aberto,85mm (3"),40.0
+PVC Soldável,Registro de Gaveta Aberto,85mm (3"),0.9
+PVC Soldável,Registro de Ângulo Aberto,85mm (3"),20.0
+PVC Soldável,Joelho 90°,110mm (4"),4.3
+PVC Soldável,Joelho 45°,110mm (4"),1.9
+PVC Soldável,Curva 90°,110mm (4"),1.6
+PVC Soldável,Curva 45°,110mm (4"),1.0
+PVC Soldável,Tê 90° Passagem Direta,110mm (4"),2.6
+PVC Soldável,Tê 90° Saída Bilateral,110mm (4"),8.3
+PVC Soldável,Tê 90° Saída Normal,110mm (4"),8.3
+PVC Soldável,Entrada de Borda,110mm (4"),2.2
+PVC Soldável,Saída de Canalização,110mm (4"),3.9
+PVC Soldável,Válvula de Pé e Crivo,110mm (4"),28.6
+PVC Soldável,Válvula de Retenção Tipo Leve,110mm (4"),10.4
+PVC Soldável,Válvula de Retenção Tipo Pesado,110mm (4"),16.0
+PVC Soldável,Registro de Globo Aberto,110mm (4"),42.3
+PVC Soldável,Registro de Gaveta Aberto,110mm (4"),1.0
+PVC Soldável,Registro de Ângulo Aberto,110mm (4"),22.1

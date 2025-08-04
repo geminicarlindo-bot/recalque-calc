@@ -1,0 +1,13 @@
+{% extends "calculator/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>{% if object %}Editar Comprimento Equivalente{% else %}Adicionar Novo Comprimento Equivalente{% endif %}</h2>
+<hr>
+<form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-success mt-3">Salvar</button>
+    <a href="{% url 'leq_list' %}" class="btn btn-secondary mt-3">Cancelar</a>
+</form>
+{% endblock %}

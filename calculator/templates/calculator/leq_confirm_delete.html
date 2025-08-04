@@ -1,0 +1,16 @@
+{% extends "calculator/base.html" %}
+
+{% block content %}
+<h2>Confirmar Exclusão</h2>
+<p>Você tem certeza que deseja deletar o registro de comprimento equivalente para:</p>
+<ul>
+    <li><strong>Peça:</strong> {{ object.peca.nome }}</li>
+    <li><strong>Tubulação:</strong> {{ object.tubulacao }}</li>
+</ul>
+<p class="text-danger">Esta ação não pode ser desfeita.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sim, tenho certeza</button>
+    <a href="{% url 'leq_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

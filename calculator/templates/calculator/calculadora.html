@@ -1,161 +1,125 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RecalqueCalc - Dimensionamento</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background-color: #f7f7f7; }
-        .container { background-color: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #2c3e50; }
-        fieldset { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; }
-        legend { font-weight: bold; color: #3498db; padding: 0 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
-        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 12px; font-size: 18px; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 4px; transition: background-color 0.3s; }
-        button:hover { background-color: #2980b9; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
-        .results-box { padding: 20px; background-color: #fdfdfd; border: 1px solid #eee; border-radius: 5px; }
-        .results-box ul { list-style: none; padding: 0; }
-        .results-box li { margin-bottom: 12px; display: flex; justify-content: space-between; }
-        .results-box li span { color: #555; }
-        .error { background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 5px; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>Dimensionamento Completo de Sistema de Recalque</h1>
-    
-    <form method="post">
-        {% csrf_token %}
-        <div class="grid-container">
-            <fieldset>
-                <legend>Dados Iniciais</legend>
-                <div>
-                    <label>Consumo Diário (Litros/dia):</label>
-                    <input type="number" step="any" name="consumo_diario_litros" required value="{{ dados_entrada.consumo_diario_litros }}">
-                </div>
-                <div>
-                    <label>Horas de Funcionamento da Bomba (h/dia):</label>
-                    <input type="number" step="any" name="horas_funcionamento" required value="{{ dados_entrada.horas_funcionamento }}">
-                </div>
-                <div>
-                    <label>Rendimento da Bomba (ex: 0.5 para 50%):</label>
-                    <input type="number" step="0.01" min="0.1" max="1.0" name="rendimento_bomba" required value="{{ dados_entrada.rendimento_bomba|default:0.5 }}">
-                </div>
-            </fieldset>
-            <fieldset>
-                <legend>Material da Tubulação</legend>
-                <select name="material" required>
-                    <option value="">--- Escolha um material ---</option>
-                    {% for material in materiais %}
-                        <option value="{{ material.id }}" {% if dados_entrada.material == material.id|stringformat:"s" %}selected{% endif %}>
-                            {{ material.nome }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </fieldset>
-            <fieldset>
-                <legend>Tubulação de Sucção</legend>
-                <div>
-                    <label>Altura Geométrica de Sucção (m):</label>
-                    <input type="number" step="any" name="altura_geo_suc_m" required value="{{ dados_entrada.altura_geo_suc_m }}">
-                </div>
-                <div>
-                    <label>Comprimento Real (m):</label>
-                    <input type="number" step="any" name="comp_real_suc_m" required value="{{ dados_entrada.comp_real_suc_m }}">
-                </div>
-            </fieldset>
-            
-            <fieldset>
-                <legend>Tubulação de Recalque</legend>
-                 <div>
-                    <label>Altura Geométrica de Recalque (m):</label>
-                    <input type="number" step="any" name="altura_geo_rec_m" required value="{{ dados_entrada.altura_geo_rec_m }}">
-                </div>
-                 <div>
-                    <label>Comprimento Real (m):</label>
-                    <input type="number" step="any" name="comp_real_rec_m" required value="{{ dados_entrada.comp_real_rec_m }}">
-                </div>
-            </fieldset>
-            <fieldset>
-                <legend>Peças e Acessórios</legend>
-                <div class="grid-container">
-                    <div>
-                        <h4>Sucção</h4>
-                        {% for peca in pecas %}
-                        <div>
-                            <label for="peca_suc_{{ peca.id }}">{{ peca.nome }}:</label>
-                            <input type="number" name="peca_suc_{{ peca.id }}" value="0" min="0">
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        <h4>Recalque</h4>
-                        {% for peca in pecas %}
-                        <div>
-                            <label for="peca_rec_{{ peca.id }}">{{ peca.nome }}:</label>
-                            <input type="number" name="peca_rec_{{ peca.id }}" value="0" min="0">
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </fieldset>
-        </div>
-        <button type="submit">Dimensionar Sistema</button>
-    </form>
+{% extends "calculator/base.html" %}
+{% load calculator_extras %}
 
-    {% if error_message %}
-        <div class="error">{{ error_message }}</div>
-    {% endif %}
+{% block title %}Calculadora - RecalqueCalc{% endblock %}
 
-    {% if resultados %}
-    <hr style="margin: 30px 0;">
-    <h2>Resultados do Dimensionamento</h2>
-    <div class="grid-container">
-        <div class="results-box">
-            <h3>Vazão e Diâmetros</h3>
-            <ul>
-                <li><span>Vazão (m³/h):</span> <strong>{{ resultados.q_m3_h|floatformat:2 }}</strong></li>
-                <li><span>Ø Recalque Calculado (mm):</span> <strong>{{ resultados.dr_calculado_mm|floatformat:2 }}</strong></li>
-                <hr>
-                <li><span>Ø Recalque Adotado (Nominal):</span> <strong>{{ resultados.dr_nominal }}</strong></li>
-                <li><span>Ø Recalque Interno (mm):</span> <strong>{{ resultados.dr_comercial_mm|floatformat:2 }}</strong></li>
-                <hr>
-                <li><span>Ø Sucção Adotado (Nominal):</span> <strong>{{ resultados.ds_nominal }}</strong></li>
-                <li><span>Ø Sucção Interno (mm):</span> <strong>{{ resultados.ds_comercial_mm|floatformat:2 }}</strong></li>
-            </ul>
-        </div>
-        <div class="results-box">
-            <h3>Análise da Sucção</h3>
-            <ul>
-                <li><span>J Unitário (m/m):</span> <strong>{{ resultados.j_suc_m_por_m|floatformat:5 }}</strong></li>
-                <li><span>Comp. Equivalente (m):</span> <strong>{{ resultados.comp_equiv_suc_m|floatformat:2 }}</strong></li>
-                <li><span>Perda de Carga Total (m):</span> <strong>{{ resultados.delta_h_suc_m|floatformat:2 }}</strong></li>
-                <hr>
-                <li><span>H. Manométrica Sucção (m):</span> <strong>{{ resultados.h_man_suc_m|floatformat:2 }}</strong></li>
-            </ul>
-        </div>
-        <div class="results-box">
-            <h3>Análise do Recalque</h3>
-            <ul>
-                <li><span>J Unitário (m/m):</span> <strong>{{ resultados.j_rec_m_por_m|floatformat:5 }}</strong></li>
-                <li><span>Comp. Equivalente (m):</span> <strong>{{ resultados.comp_equiv_rec_m|floatformat:2 }}</strong></li>
-                <li><span>Perda de Carga Total (m):</span> <strong>{{ resultados.delta_h_rec_m|floatformat:2 }}</strong></li>
-                <hr>
-                <li><span>H. Manométrica Recalque (m):</span> <strong>{{ resultados.h_man_rec_m|floatformat:2 }}</strong></li>
-            </ul>
-        </div>
-        <div class="results-box">
-            <h3>Resumo e Potência</h3>
-            <ul>
-                <li><span>H. Manométrica TOTAL (mca):</span> <h3>{{ resultados.h_man_total_m|floatformat:2 }}</h3></li>
-                <li><span>Potência Calculada (CV):</span> <strong>{{ resultados.potencia_calculada_cv|floatformat:2 }}</strong></li>
-                <li><span>Potência Comercial (CV):</span> <h3>{{ resultados.potencia_comercial_cv }}</h3></li>
-            </ul>
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pencil-square"></i> Parâmetros de Entrada
+            </div>
+            <div class="card-body">
+                <form method="post" id="calcForm" target="_blank">
+                    {% csrf_token %}
+                    
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="inicio-tab" data-bs-toggle="tab" data-bs-target="#tab-inicio" type="button" role="tab">1. Início</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="succao-tab" data-bs-toggle="tab" data-bs-target="#tab-succao" type="button" role="tab">2. Sucção</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="recalque-tab" data-bs-toggle="tab" data-bs-target="#tab-recalque" type="button" role="tab">3. Recalque</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pecas-tab" data-bs-toggle="tab" data-bs-target="#tab-pecas" type="button" role="tab">4. Peças</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content pt-3" id="myTabContent">
+                        <div class="tab-pane fade show active" id="tab-inicio" role="tabpanel">
+                             <fieldset class="border-0 p-0">
+                                <legend class="fs-6 text-primary">Dados Iniciais</legend>
+                                <div class="mb-3">
+                                    <label class="form-label">Consumo Diário (Litros/dia):</label>
+                                    <input type="number" step="any" name="consumo_diario_litros" class="form-control" required value="{{ dados_entrada.consumo_diario_litros }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Horas de Funcionamento da Bomba (h/dia):</label>
+                                    <input type="number" step="any" name="horas_funcionamento" class="form-control" required value="{{ dados_entrada.horas_funcionamento }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Rendimento da Bomba (ex: 0.5 para 50%):</label>
+                                    <input type="number" step="0.01" min="0.1" max="1.0" name="rendimento_bomba" class="form-control" required value="{{ dados_entrada.rendimento_bomba|default:0.5 }}">
+                                </div>
+                            </fieldset>
+                            <fieldset class="border-0 p-0">
+                                <legend class="fs-6 text-primary">Material da Tubulação</legend>
+                                <select name="material" class="form-select" required>
+                                    <option value="">--- Escolha um material ---</option>
+                                    {% for material in materiais %}
+                                        <option value="{{ material.id }}" {% if dados_entrada.material == material.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ material.nome }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="tab-pane fade" id="tab-succao" role="tabpanel">
+                             <fieldset class="border-0 p-0">
+                                <legend class="fs-6 text-primary">Tubulação de Sucção</legend>
+                                <div class="mb-3">
+                                    <label class="form-label">Altura Geométrica de Sucção (m):</label>
+                                    <input type="number" step="any" name="altura_geo_suc_m" class="form-control" required value="{{ dados_entrada.altura_geo_suc_m }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Comprimento Real (m):</label>
+                                    <input type="number" step="any" name="comp_real_suc_m" class="form-control" required value="{{ dados_entrada.comp_real_suc_m }}">
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="tab-pane fade" id="tab-recalque" role="tabpanel">
+                             <fieldset class="border-0 p-0">
+                                <legend class="fs-6 text-primary">Tubulação de Recalque</legend>
+                                 <div class="mb-3">
+                                    <label class="form-label">Altura Geométrica de Recalque (m):</label>
+                                    <input type="number" step="any" name="altura_geo_rec_m" class="form-control" required value="{{ dados_entrada.altura_geo_rec_m }}">
+                                </div>
+                                 <div class="mb-3">
+                                    <label class="form-label">Comprimento Real (m):</label>
+                                    <input type="number" step="any" name="comp_real_rec_m" class="form-control" required value="{{ dados_entrada.comp_real_rec_m }}">
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="tab-pane fade" id="tab-pecas" role="tabpanel">
+                             <fieldset class="border-0 p-0">
+                                <legend class="fs-6 text-primary">Peças e Acessórios</legend>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5><i class="bi bi-arrow-down-circle"></i> Sucção</h5>
+                                        {% for peca in pecas %}
+                                        <div class="mb-2">
+                                            <label class="form-label small">{{ peca.nome }}:</label>
+                                            <input type="number" class="form-control form-control-sm" name="peca_suc_{{ peca.id }}" value="{{ dados_entrada.pecas_suc|get_item:peca.id|default:0 }}" min="0">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5><i class="bi bi-arrow-up-circle"></i> Recalque</h5>
+                                        {% for peca in pecas %}
+                                        <div class="mb-2">
+                                            <label class="form-label small">{{ peca.nome }}:</label>
+                                            <input type="number" class="form-control form-control-sm" name="peca_rec_{{ peca.id }}" value="{{ dados_entrada.pecas_rec|get_item:peca.id|default:0 }}" min="0">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mt-4">
+                        Dimensionar Sistema
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
-    {% endif %}
+
+    <div class="col-lg-5">
+        </div>
 </div>
-</body>
-</html>
+{% endblock %}

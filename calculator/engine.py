@@ -78,25 +78,52 @@ def _dimensionar_diametros(vazao_m3s: float, horas_funcionamento: float, materia
     }
 
 
-def _calcular_j_fair_whipple(vazao_m3s: float, diametro_m: float) -> float:
-    """Calcula a perda de carga unitária (J) pela fórmula de Fair-Whipple-Hsiao."""
-    if diametro_m == 0: return 0
-    return 0.000859 * (vazao_m3s**1.75) / (diametro_m**4.75)
+def _calcular_j_fair_whipple(vazao_l_s: float, diametro_mm: float) -> float:
+    """Calcula a perda de carga unitária (J) pela fórmula de Fair-Whipple-Hsiao,
+    utilizando vazão em L/s e diâmetro em mm."""
+    
+    if diametro_mm == 0:
+        return 0
+        
+ 
+    return 869000 * (vazao_l_s**1.75) / (diametro_mm**4.75)
 
-def _calcular_h_manometrica(vazao_m3s: float, dr_mm: float, ds_mm: float, h_geo_suc: float, h_geo_rec: float, lt_suc: float, lt_rec: float) -> dict:
+def _calcular_h_manometrica(
+    vazao_m3s: float, dr_mm: float, ds_mm: float,
+    h_geo_suc: float, h_geo_rec: float,
+    lt_suc: float, lt_rec: float
+) -> dict:
     """Calcula as perdas de carga e a Hman total."""
-    dr_m = dr_mm / 1000
-    ds_m = ds_mm / 1000
-    j_suc = _calcular_j_fair_whipple(vazao_m3s, ds_m)
-    j_rec = _calcular_j_fair_whipple(vazao_m3s, dr_m)
+    
+    # --- MUDANÇA AQUI ---
+    # Convertemos a vazão para L/s ANTES de chamar a função de cálculo de J.
+    vazao_l_s = vazao_m3s * 1000
+    
+    # Não precisamos mais converter os diâmetros de mm para m aqui.
+    # dr_m = dr_mm / 1000 <--- REMOVIDO
+    # ds_m = ds_mm / 1000 <--- REMOVIDO
+    
+    # Perda de carga unitária (J)
+    # Agora passamos os valores diretamente em L/s e mm.
+    j_suc = _calcular_j_fair_whipple(vazao_l_s, ds_mm)
+    j_rec = _calcular_j_fair_whipple(vazao_l_s, dr_mm)
+    
+    # O resto da função continua exatamente igual.
     delta_h_suc = lt_suc * j_suc
     delta_h_rec = lt_rec * j_rec
+    
     h_man_suc = h_geo_suc + delta_h_suc
     h_man_rec = h_geo_rec + delta_h_rec
+    
     h_man_total = h_man_suc + h_man_rec
+    
     return {
-        "j_suc_m_por_m": j_suc, "j_rec_m_por_m": j_rec, "delta_h_suc_m": delta_h_suc,
-        "delta_h_rec_m": delta_h_rec, "h_man_suc_m": h_man_suc, "h_man_rec_m": h_man_rec,
+        "j_suc_m_por_m": j_suc,
+        "j_rec_m_por_m": j_rec,
+        "delta_h_suc_m": delta_h_suc,
+        "delta_h_rec_m": delta_h_rec,
+        "h_man_suc_m": h_man_suc,
+        "h_man_rec_m": h_man_rec,
         "h_man_total_m": h_man_total
     }
 

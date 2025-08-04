@@ -1,11 +1,15 @@
 # recalque_core/urls.py
 
 from django.contrib import admin
-from django.urls import path, include # Certifique-se de que 'include' está aqui
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Este comando diz: "Qualquer URL que chegar aqui,
-    # passe a responsabilidade para o arquivo 'calculator.urls'".
+
+    # Adicionamos esta linha:
+    # Ela cria automaticamente as rotas como /login/, /logout/, etc.
+    path('accounts/', include('django.contrib.auth.urls')),
+
+    # Nossa calculadora continua na rota principal
     path('', include('calculator.urls')),
 ]
