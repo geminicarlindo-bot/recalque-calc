@@ -11,37 +11,54 @@ from .models import Tubulacao, ComprimentoEquivalente # Adicione ComprimentoEqui
 GRAVIDADE = 9.81  # Aceleração da gravidade (m/s²)
 VISCOSIDADE_CINEMATICA_AGUA = 1.004e-6  # Viscosidade da água a 20°C (m²/s)
 
-def _calcular_leq_total(tubulacao_obj: Tubulacao, pecas_quantidades: dict) -> float:
-    """Calcula o comprimento equivalente total para um trecho."""
+def _calcular_leq_total(tubulacao_obj: Tubulacao, pecas_quantidades: dict) -> dict:
+    """Calcula o Leq total e retorna também um detalhamento por peça."""
     leq_total = 0.0
+    detalhes_pecas = [] # ### NOVA LISTA PARA OS DETALHES ###
     
-
     if not tubulacao_obj:
-        return 0.0
-    
+        return {'total': 0.0, 'detalhes': []}
+            
     for peca_id, quantidade in pecas_quantidades.items():
-
         try:
-            comp_eq = ComprimentoEquivalente.objects.get(
+            comp_eq_obj = ComprimentoEquivalente.objects.select_related('peca').get(
                 peca_id=peca_id,
                 tubulacao=tubulacao_obj
             )
-
-            leq_total += comp_eq.comprimento_m * quantidade
+            leq_unitario = comp_eq_obj.comprimento_m
+            leq_parcial = leq_unitario * quantidade
+            leq_total += leq_parcial
+            
+            # Adicionamos os detalhes à nossa lista
+            detalhes_pecas.append({
+                'nome': comp_eq_obj.peca.nome,
+                'qtd': quantidade,
+                'leq_unitario': leq_unitario,
+                'leq_parcial': leq_parcial,
+            })
         except ComprimentoEquivalente.DoesNotExist:
-
+            print(f"Aviso: Leq não encontrado para peça {peca_id} e tubulação {tubulacao_obj.id}")
             pass
             
-    return leq_total
+    # ### NOVO RETORNO: UM DICIONÁRIO COMPLETO ###
+    return {'total': leq_total, 'detalhes': detalhes_pecas}
 
 def _calcular_vazao(consumo_diario_litros: float, horas_funcionamento: float) -> dict:
-    """Calcula a vazão de recalque em L/h, m³/h e m³/s."""
+    """Calcula a vazão de recalque em L/h, m³/h, m³/s e L/s."""
     if horas_funcionamento == 0:
         return {}
+        
     q_litros_h = consumo_diario_litros / horas_funcionamento
     q_m3_h = q_litros_h / 1000
     q_m3_s = q_m3_h / 3600
-    return {"q_litros_h": q_litros_h, "q_m3_h": q_m3_h, "q_m3_s": q_m3_s}
+    q_l_s = q_m3_s * 1000  # ### NOVO VALOR RETORNADO ###
+    
+    return {
+        "q_litros_h": q_litros_h,
+        "q_m3_h": q_m3_h,
+        "q_m3_s": q_m3_s,
+        "q_l_s": q_l_s,
+    }
 
 def _dimensionar_diametros(vazao_m3s: float, horas_funcionamento: float, material_id: int) -> dict:
     """Calcula o diâmetro teórico e busca na base de dados a tubulação
@@ -75,6 +92,8 @@ def _dimensionar_diametros(vazao_m3s: float, horas_funcionamento: float, materia
         "ds_nominal": tubulacao_succao.diametro_nominal,
         "tubulacao_recalque_obj": tubulacao_recalque, # Objeto necessário
         "tubulacao_succao_obj": tubulacao_succao,   # Objeto necessário
+        "X_factor": X,  # <-- ADICIONAMOS ESTA LINHA
+
     }
 
 
@@ -175,9 +194,13 @@ def dimensionar_sistema_completo(
     tubulacao_recalque_obj = dados_diametros['tubulacao_recalque_obj']
     tubulacao_succao_obj = dados_diametros['tubulacao_succao_obj']
 
-    # Agora as variáveis pecas_suc e pecas_rec existem e podem ser usadas
-    comp_equiv_suc_m = _calcular_leq_total(tubulacao_succao_obj, pecas_suc)
-    comp_equiv_rec_m = _calcular_leq_total(tubulacao_recalque_obj, pecas_rec)
+    # Agora recebemos o dicionário completo
+    resultado_leq_suc = _calcular_leq_total(tubulacao_succao_obj, pecas_suc)
+    resultado_leq_rec = _calcular_leq_total(tubulacao_recalque_obj, pecas_rec)
+    
+    # Usamos o total para os cálculos
+    comp_equiv_suc_m = resultado_leq_suc['total']
+    comp_equiv_rec_m = resultado_leq_rec['total']
 
     lt_suc = comp_real_suc_m + comp_equiv_suc_m
     lt_rec = comp_real_rec_m + comp_equiv_rec_m
@@ -202,6 +225,10 @@ def dimensionar_sistema_completo(
         **dados_vazao, **dados_diametros, **dados_hman, **dados_potencia,
         "comp_equiv_suc_m": comp_equiv_suc_m,
         "comp_equiv_rec_m": comp_equiv_rec_m,
+        # ### NOVOS DADOS PARA O RELATÓRIO ###
+        "detalhes_pecas_suc": resultado_leq_suc['detalhes'],
+        "detalhes_pecas_rec": resultado_leq_rec['detalhes'],
+        "h_geo_suc_ajustada": altura_geo_suc_ajustada,
     }
     
     return resultados_finais
