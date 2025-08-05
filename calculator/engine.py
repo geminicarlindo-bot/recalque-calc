@@ -148,8 +148,9 @@ def dimensionar_sistema_completo(
     # ==========================================================
     # CORREÇÃO: Adicionados os parâmetros que faltavam aqui
     pecas_suc: dict, 
-    pecas_rec: dict
-    # ==========================================================
+    pecas_rec: dict,
+    tipo_succao: str
+
 ) -> dict:
     """
     Implementa o roteiro completo de dimensionamento.
@@ -162,6 +163,11 @@ def dimensionar_sistema_completo(
         material_id=material_id
     )
     
+    altura_geo_suc_ajustada = altura_geo_suc_m
+    if tipo_succao == 'positiva':
+        # Se a sucção for positiva (aspirante), o desnível é negativo no cálculo da energia
+        altura_geo_suc_ajustada = -abs(altura_geo_suc_m)
+
     if dados_diametros.get('dr_comercial_mm') is None:
         dr_calculado = dados_diametros.get('dr_calculado_mm', 0)
         raise ValueError(f"A vazão é muito alta. O diâmetro calculado ({dr_calculado:.1f} mm) excede os diâmetros comerciais disponíveis.")
@@ -180,7 +186,7 @@ def dimensionar_sistema_completo(
         vazao_m3s=dados_vazao['q_m3_s'],
         dr_mm=dados_diametros['dr_comercial_mm'],
         ds_mm=dados_diametros['ds_comercial_mm'],
-        h_geo_suc=altura_geo_suc_m,
+        h_geo_suc=altura_geo_suc_ajustada,
         h_geo_rec=altura_geo_rec_m,
         lt_suc=lt_suc,
         lt_rec=lt_rec

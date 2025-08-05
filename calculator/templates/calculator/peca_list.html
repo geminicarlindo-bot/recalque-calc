@@ -23,8 +23,15 @@
                     <td>{{ peca.nome }}</td>
                     <td>{{ peca.descricao|default:"-" }}</td>
                     <td>
-                        <a href="{% url 'peca_update' peca.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                        <a href="{% url 'peca_delete' peca.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
+                        <a href="{% url 'peca_update' peca.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar Nome/Descrição">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'leq_bulk_edit' peca.pk %}" class="btn btn-sm btn-primary" title="Editar Comprimentos Equivalentes">
+                            <i class="bi bi-rulers"></i> 
+                        </a>
+                        <a href="{% url 'peca_delete' peca.pk %}" class="btn btn-sm btn-outline-danger" title="Deletar Peça">
+                            <i class="bi bi-trash"></i>
+                        </a>
                     </td>
                 </tr>
                 {% empty %}

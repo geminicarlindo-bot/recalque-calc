@@ -1,0 +1,55 @@
+{% extends "calculator/base.html" %}
+
+{% block title %}Memorial de Cálculo - RecalqueCalc{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2><i class="bi bi-file-earmark-text-fill"></i> Memorial de Cálculo</h2>
+        <button class="btn btn-secondary" onclick="window.print()">
+            <i class="bi bi-printer-fill"></i> Imprimir / Salvar como PDF
+        </button>
+    </div>
+    <div class="card-body">
+        {% if resultados and dados_entrada %}
+            <h3 class="text-primary">1. Dados de Entrada</h3>
+            <ul>
+                <li>Consumo Diário: <strong>{{ dados_entrada.consumo_diario_litros.0 }} L/dia</strong></li>
+                <li>Horas de Funcionamento: <strong>{{ dados_entrada.horas_funcionamento.0 }} h</strong></li>
+                <li>Tipo de Sucção: <strong>{{ dados_entrada.tipo_succao.0|capfirst }}</strong></li>
+                </ul>
+
+            <h3 class="text-primary mt-4">2. Cálculo da Vazão</h3>
+            <p>Q = Consumo Diário / Horas de Funcionamento</p>
+            <p>Q = {{ dados_entrada.consumo_diario_litros.0 }} / {{ dados_entrada.horas_funcionamento.0 }} = <strong>{{ resultados.q_litros_h|floatformat:2 }} L/h</strong> ou <strong>{{ resultados.q_m3_h|floatformat:2 }} m³/h</strong></p>
+
+            <h3 class="text-primary mt-4">3. Dimensionamento dos Diâmetros</h3>
+            <p>Utilizando a fórmula de Forchheimer:</p>
+            <p>Diâmetro de Recalque Calculado = <strong>{{ resultados.dr_calculado_mm|floatformat:2 }} mm</strong></p>
+            <p>Diâmetro de Recalque Adotado (Nominal): <strong>{{ resultados.dr_nominal }}</strong> (DI = {{ resultados.dr_comercial_mm }} mm)</p>
+            <p>Diâmetro de Sucção Adotado (Nominal): <strong>{{ resultados.ds_nominal }}</strong> (DI = {{ resultados.ds_comercial_mm }} mm)</p>
+
+            <h3 class="text-primary mt-4">4. Cálculo das Perdas de Carga (Fair-Whipple-Hsiao)</h3>
+            <h4>4.1 Trecho de Sucção</h4>
+            <p>J_sucção = 859000 * ({{ resultados.q_m3_s|floatformat:4 }} * 1000)<sup>1.75</sup> / {{ resultados.ds_comercial_mm }}<sup>4.75</sup> = <strong>{{ resultados.j_suc_m_por_m|floatformat:5 }} m/m</strong></p>
+            <p>ΔH_sucção = J * (Comp. Real + Comp. Equivalente) = {{ resultados.j_suc_m_por_m|floatformat:5 }} * ({{ dados_entrada.comp_real_suc_m.0 }} + {{ resultados.comp_equiv_suc_m|floatformat:2 }}) = <strong>{{ resultados.delta_h_suc_m|floatformat:2 }} m</strong></p>
+            
+            <h4>4.2 Trecho de Recalque</h4>
+            <p>J_recalque = 859000 * ({{ resultados.q_m3_s|floatformat:4 }} * 1000)<sup>1.75</sup> / {{ resultados.dr_comercial_mm }}<sup>4.75</sup> = <strong>{{ resultados.j_rec_m_por_m|floatformat:5 }} m/m</strong></p>
+            <p>ΔH_recalque = J * (Comp. Real + Comp. Equivalente) = {{ resultados.j_rec_m_por_m|floatformat:5 }} * ({{ dados_entrada.comp_real_rec_m.0 }} + {{ resultados.comp_equiv_rec_m|floatformat:2 }}) = <strong>{{ resultados.delta_h_rec_m|floatformat:2 }} m</strong></p>
+
+            <h3 class="text-primary mt-4">5. Altura Manométrica Total (AMT)</h3>
+            <p>AMT = H_geo_suc + ΔH_suc + H_geo_rec + ΔH_rec</p>
+            <p>AMT = ({{ dados_entrada.altura_geo_suc_m.0 }}) + ({{ resultados.delta_h_suc_m|floatformat:2 }}) + ({{ dados_entrada.altura_geo_rec_m.0 }}) + ({{ resultados.delta_h_rec_m|floatformat:2 }}) = <strong>{{ resultados.h_man_total_m|floatformat:2 }} m.c.a.</strong></p>
+
+            <h3 class="text-primary mt-4">6. Potência da Bomba</h3>
+            <p>Potência = (Q_L/s * AMT) / (75 * Rendimento)</p>
+            <p>Potência = ({{ resultados.q_m3_s|floatformat:2 }}*1000 * {{ resultados.h_man_total_m|floatformat:2 }}) / (75 * {{ dados_entrada.rendimento_bomba.0 }}) = <strong>{{ resultados.potencia_calculada_cv|floatformat:2 }} CV</strong></p>
+            <h4 class="mt-3">Potência Comercial Recomendada: <span class="text-success">{{ resultados.potencia_comercial_cv }} CV</span></h4>
+
+        {% else %}
+            <div class="alert alert-danger">Os dados do cálculo não foram encontrados na sessão. Por favor, realize um novo dimensionamento.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -6,7 +6,8 @@ from . import views
 urlpatterns = [
     # Rotas existentes
     path('', views.calculadora_view, name='calculadora'),
-    path('resultado/', views.resultado_view, name='resultado'),
+    # Renomeamos a rota para o relatório
+    path('relatorio/', views.resultado_view, name='relatorio'),
 
     # Rotas para o CRUD de Materiais
     path('catalog/materiais/', views.MaterialListView.as_view(), name='material_list'),
@@ -27,5 +28,6 @@ urlpatterns = [
     path('catalog/leq/novo/', views.ComprimentoEquivalenteCreateView.as_view(), name='leq_create'),
     path('catalog/leq/<int:pk>/editar/', views.ComprimentoEquivalenteUpdateView.as_view(), name='leq_update'),
     path('catalog/leq/<int:pk>/deletar/', views.ComprimentoEquivalenteDeleteView.as_view(), name='leq_delete'),
+    path('catalog/pecas/<int:pk>/editar-leqs/', views.gerenciar_leqs_por_peca, name='leq_bulk_edit'),
 
 ]

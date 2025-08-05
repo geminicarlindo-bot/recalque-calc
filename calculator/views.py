@@ -1,16 +1,17 @@
 # calculator/views.py
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.forms import inlineformset_factory
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Material, Peca, Tubulacao, ComprimentoEquivalente
 from .engine import dimensionar_sistema_completo
 
+
 def calculadora_view(request):
     """
-    Esta view agora tem duas responsabilidades:
-    1. (GET) Apenas exibir o formulário de cálculo.
-    2. (POST) Processar os dados, salvar os resultados na sessão e redirecionar.
+    View unificada que exibe o formulário, processa os dados
+    e mostra os resultados na mesma página.
     """
     context = {
         'materiais': Material.objects.all(),
@@ -19,7 +20,7 @@ def calculadora_view(request):
 
     if request.method == 'POST':
         try:
-            # Coleta as quantidades de peças do formulário
+            # Coleta as quantidades de peças
             pecas_suc_quantidades = {}
             pecas_rec_quantidades = {}
             for peca in context['pecas']:
@@ -41,6 +42,7 @@ def calculadora_view(request):
                 "comp_real_rec_m": float(request.POST.get('comp_real_rec_m')),
                 "rendimento_bomba": float(request.POST.get('rendimento_bomba')),
                 "material_id": int(request.POST.get('material')),
+                "tipo_succao": request.POST.get('tipo_succao', 'negativa'),
                 "pecas_suc": pecas_suc_quantidades,
                 "pecas_rec": pecas_rec_quantidades
             }
@@ -48,46 +50,46 @@ def calculadora_view(request):
             # Executa o cálculo
             resultados = dimensionar_sistema_completo(**dados_calculo)
 
-
-            # ==========================================================
-            # ### CORREÇÃO IMPORTANTE AQUI ###
-            # ==========================================================
-            # Preparamos uma versão "limpa" dos resultados para a sessão.
+            # Salva os resultados e os dados de entrada no contexto
+            context['resultados'] = resultados
+            context['dados_entrada'] = request.POST # Para repopular o formulário
+            # Preparamos uma versão "limpa" dos resultados para a SESSÃO
             resultados_para_sessao = resultados.copy()
-
-            # Removemos as chaves que contêm objetos complexos (os "carros").
-            # O .pop(chave, None) é uma forma segura de remover, que não dá erro se a chave não existir.
+            # Removemos as chaves que contêm objetos complexos que o JSON não entende
             resultados_para_sessao.pop('tubulacao_recalque_obj', None)
             resultados_para_sessao.pop('tubulacao_succao_obj', None)
 
-            # AGORA SALVAMOS A VERSÃO LIMPA NA SESSÃO DO USUÁRIO
-            request.session['calculation_results'] = resultados_para_sessao
+            # Agora salvamos a VERSÃO LIMPA na sessão para a página de relatório
+            request.session['report_results'] = resultados_para_sessao
             
-            # E o redirecionamento continua o mesmo
-            return redirect('resultado')
+            # request.POST já é um dicionário serializável, então está ok
+            # Para garantir, convertemos para um dict padrão
+            request.session['report_inputs'] = dict(request.POST.lists())
 
         except (ValueError, TypeError, ZeroDivisionError) as e:
             context['error_message'] = f"Erro nos dados de entrada. Verifique os valores e tente novamente. (Detalhe: {e})"
             context['dados_entrada'] = request.POST
 
-    # Para requisições GET, apenas exibe o formulário
     return render(request, 'calculator/calculadora.html', context)
 
-
+# A resultado_view pode ser removida, mas vamos mantê-la por enquanto
+# para a nova página de relatório.
 def resultado_view(request):
-    """
-    Esta nova view apenas busca os resultados da sessão e os exibe.
-    """
-    # Pega os resultados da sessão. O .pop() remove o dado, evitando que ele
-    # seja exibido novamente se o usuário atualizar a página.
-    resultados = request.session.pop('calculation_results', None)
-    
-    context = {
-        'resultados': resultados
-    }
-    
-    return render(request, 'calculator/resultado.html', context)
+    # Esta view agora será o nosso "Memorial de Cálculo"
+    resultados = request.session.get('report_results', None)
+    dados_entrada = request.session.get('report_inputs', None)
 
+    # Limpamos a sessão para não mostrar o mesmo relatório antigo
+    if 'report_results' in request.session:
+        del request.session['report_results']
+    if 'report_inputs' in request.session:
+        del request.session['report_inputs']
+
+    context = {
+        'resultados': resultados,
+        'dados_entrada': dados_entrada
+    }
+    return render(request, 'calculator/relatorio.html', context)
 
 # ==========================================================
 # ### NOVAS VIEWS PARA O CRUD DE MATERIAIS ###
@@ -188,3 +190,39 @@ class ComprimentoEquivalenteDeleteView(DeleteView):
     model = ComprimentoEquivalente
     template_name = 'calculator/leq_confirm_delete.html'
     success_url = reverse_lazy('leq_list')
+
+def gerenciar_leqs_por_peca(request, pk):
+    peca = get_object_or_404(Peca, pk=pk)
+
+    # O inlineformset_factory cria um conjunto de formulários para ComprimentoEquivalente
+    # que estão ligados a uma instância de Peca.
+    LeqFormSet = inlineformset_factory(
+        Peca,                      # O modelo "pai"
+        ComprimentoEquivalente,    # O modelo "filho"
+        fields=('tubulacao', 'comprimento_m'), # Campos a serem editados no filho
+        extra=0,                   # Não mostrar formulários extras em branco
+        can_delete=False           # Não permitir deletar por aqui
+    )
+
+    # Para cada tubulação que existe, garantimos que um objeto ComprimentoEquivalente
+    # (mesmo que com Leq=0) exista para que o formset possa exibi-lo.
+    for tubulacao in Tubulacao.objects.all():
+        ComprimentoEquivalente.objects.get_or_create(
+            peca=peca,
+            tubulacao=tubulacao,
+            defaults={'comprimento_m': 0.0}
+        )
+
+    if request.method == 'POST':
+        formset = LeqFormSet(request.POST, instance=peca)
+        if formset.is_valid():
+            formset.save()
+            return redirect('peca_list') # Volta para a lista de peças
+    else:
+        formset = LeqFormSet(instance=peca)
+
+    context = {
+        'formset': formset,
+        'peca': peca
+    }
+    return render(request, 'calculator/leq_por_peca_form.html', context)

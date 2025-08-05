@@ -11,39 +11,37 @@
                 <i class="bi bi-pencil-square"></i> Parâmetros de Entrada
             </div>
             <div class="card-body">
-                <form method="post" id="calcForm" target="_blank">
+                <form method="post" id="calcForm">
                     {% csrf_token %}
                     
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="inicio-tab" data-bs-toggle="tab" data-bs-target="#tab-inicio" type="button" role="tab">1. Início</button>
+                            <button class="nav-link active" id="inicio-tab" data-bs-toggle="tab" data-bs-target="#tab-inicio" type="button" role="tab" aria-controls="tab-inicio" aria-selected="true">1. Início</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="succao-tab" data-bs-toggle="tab" data-bs-target="#tab-succao" type="button" role="tab">2. Sucção</button>
+                            <button class="nav-link" id="succao-tab" data-bs-toggle="tab" data-bs-target="#tab-succao" type="button" role="tab" aria-controls="tab-succao" aria-selected="false">2. Sucção</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="recalque-tab" data-bs-toggle="tab" data-bs-target="#tab-recalque" type="button" role="tab">3. Recalque</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pecas-tab" data-bs-toggle="tab" data-bs-target="#tab-pecas" type="button" role="tab">4. Peças</button>
+                            <button class="nav-link" id="recalque-tab" data-bs-toggle="tab" data-bs-target="#tab-recalque" type="button" role="tab" aria-controls="tab-recalque" aria-selected="false">3. Recalque</button>
                         </li>
                     </ul>
 
                     <div class="tab-content pt-3" id="myTabContent">
-                        <div class="tab-pane fade show active" id="tab-inicio" role="tabpanel">
-                             <fieldset class="border-0 p-0">
+                        
+                        <div class="tab-pane fade show active" id="tab-inicio" role="tabpanel" aria-labelledby="inicio-tab">
+                            <fieldset class="border-0 p-0 mb-3">
                                 <legend class="fs-6 text-primary">Dados Iniciais</legend>
                                 <div class="mb-3">
-                                    <label class="form-label">Consumo Diário (Litros/dia):</label>
-                                    <input type="number" step="any" name="consumo_diario_litros" class="form-control" required value="{{ dados_entrada.consumo_diario_litros }}">
+                                    <label for="id_consumo_diario" class="form-label">Consumo Diário (Litros/dia):</label>
+                                    <input type="number" id="id_consumo_diario" step="any" name="consumo_diario_litros" class="form-control" required value="{{ dados_entrada.consumo_diario_litros }}">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Horas de Funcionamento da Bomba (h/dia):</label>
-                                    <input type="number" step="any" name="horas_funcionamento" class="form-control" required value="{{ dados_entrada.horas_funcionamento }}">
+                                    <label for="id_horas" class="form-label">Horas de Funcionamento da Bomba (h/dia):</label>
+                                    <input type="number" id="id_horas" step="any" name="horas_funcionamento" class="form-control" required value="{{ dados_entrada.horas_funcionamento }}">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Rendimento da Bomba (ex: 0.5 para 50%):</label>
-                                    <input type="number" step="0.01" min="0.1" max="1.0" name="rendimento_bomba" class="form-control" required value="{{ dados_entrada.rendimento_bomba|default:0.5 }}">
+                                    <label for="id_rendimento" class="form-label">Rendimento da Bomba (ex: 0.5 para 50%):</label>
+                                    <input type="number" id="id_rendimento" step="0.01" min="0.1" max="1.0" name="rendimento_bomba" class="form-control" required value="{{ dados_entrada.rendimento_bomba|default:0.5 }}">
                                 </div>
                             </fieldset>
                             <fieldset class="border-0 p-0">
@@ -58,11 +56,29 @@
                                 </select>
                             </fieldset>
                         </div>
-                        <div class="tab-pane fade" id="tab-succao" role="tabpanel">
-                             <fieldset class="border-0 p-0">
-                                <legend class="fs-6 text-primary">Tubulação de Sucção</legend>
+
+                        <div class="tab-pane fade" id="tab-succao" role="tabpanel" aria-labelledby="succao-tab">
+                            <fieldset class="border-0 p-0">
+                                <legend class="fs-6 text-primary">Parâmetros da Sucção</legend>
+
                                 <div class="mb-3">
-                                    <label class="form-label">Altura Geométrica de Sucção (m):</label>
+                                    <label class="form-label">Tipo de Sucção:</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="tipo_succao" id="tipo_negativa" value="negativa" 
+                                            {% if dados_entrada.tipo_succao != 'positiva' %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="tipo_negativa">
+                                            <i class="bi bi-arrow-down"></i> Negativa (Aspirante)
+                                        </label>
+
+                                        <input type="radio" class="btn-check" name="tipo_succao" id="tipo_positiva" value="positiva"
+                                            {% if dados_entrada.tipo_succao == 'positiva' %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="tipo_positiva">
+                                            <i class="bi bi-arrow-up"></i> Positiva (Afogada)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Desnível Geométrico de Sucção (m):</label>
                                     <input type="number" step="any" name="altura_geo_suc_m" class="form-control" required value="{{ dados_entrada.altura_geo_suc_m }}">
                                 </div>
                                 <div class="mb-3">
@@ -70,10 +86,29 @@
                                     <input type="number" step="any" name="comp_real_suc_m" class="form-control" required value="{{ dados_entrada.comp_real_suc_m }}">
                                 </div>
                             </fieldset>
+                            
+                            <div class="mt-3">
+                                <p>
+                                    <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#pecasSuccaoCollapse">
+                                        <i class="bi bi-plus-lg"></i> Adicionar Peças e Acessórios (Sucção)
+                                    </button>
+                                </p>
+                                <div class="collapse" id="pecasSuccaoCollapse">
+                                    <div class="card card-body bg-light">
+                                        {% for peca in pecas %}
+                                        <div class="mb-2">
+                                            <label class="form-label small">{{ peca.nome }}:</label>
+                                            <input type="number" class="form-control form-control-sm" name="peca_suc_{{ peca.id }}" value="{{ dados_entrada.pecas_suc|get_item:peca.id|default:0 }}" min="0">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="tab-pane fade" id="tab-recalque" role="tabpanel">
-                             <fieldset class="border-0 p-0">
-                                <legend class="fs-6 text-primary">Tubulação de Recalque</legend>
+
+                        <div class="tab-pane fade" id="tab-recalque" role="tabpanel" aria-labelledby="recalque-tab">
+                            <fieldset class="border-0 p-0">
+                                <legend class="fs-6 text-primary">Parâmetros do Recalque</legend>
                                  <div class="mb-3">
                                     <label class="form-label">Altura Geométrica de Recalque (m):</label>
                                     <input type="number" step="any" name="altura_geo_rec_m" class="form-control" required value="{{ dados_entrada.altura_geo_rec_m }}">
@@ -83,22 +118,15 @@
                                     <input type="number" step="any" name="comp_real_rec_m" class="form-control" required value="{{ dados_entrada.comp_real_rec_m }}">
                                 </div>
                             </fieldset>
-                        </div>
-                        <div class="tab-pane fade" id="tab-pecas" role="tabpanel">
-                             <fieldset class="border-0 p-0">
-                                <legend class="fs-6 text-primary">Peças e Acessórios</legend>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h5><i class="bi bi-arrow-down-circle"></i> Sucção</h5>
-                                        {% for peca in pecas %}
-                                        <div class="mb-2">
-                                            <label class="form-label small">{{ peca.nome }}:</label>
-                                            <input type="number" class="form-control form-control-sm" name="peca_suc_{{ peca.id }}" value="{{ dados_entrada.pecas_suc|get_item:peca.id|default:0 }}" min="0">
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h5><i class="bi bi-arrow-up-circle"></i> Recalque</h5>
+                            
+                            <div class="mt-3">
+                                 <p>
+                                    <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#pecasRecalqueCollapse" aria-expanded="false" aria-controls="pecasRecalqueCollapse">
+                                        <i class="bi bi-plus-lg"></i> Adicionar Peças e Acessórios (Recalque)
+                                    </button>
+                                </p>
+                                <div class="collapse" id="pecasRecalqueCollapse">
+                                    <div class="card card-body bg-light">
                                         {% for peca in pecas %}
                                         <div class="mb-2">
                                             <label class="form-label small">{{ peca.nome }}:</label>
@@ -107,7 +135,7 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-                            </fieldset>
+                            </div>
                         </div>
                     </div>
                     
@@ -120,6 +148,104 @@
     </div>
 
     <div class="col-lg-5">
-        </div>
+        {% if error_message %}
+            <div class="alert alert-danger">{{ error_message }}</div>
+        {% endif %}
+
+        {% if resultados %}
+            <div class="card mb-3">
+                <div class="card-header"><i class="bi bi-graph-up"></i> Vazão e Diâmetros</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between"><span>Vazão (m³/h):</span> <strong>{{ resultados.q_m3_h|floatformat:2 }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Ø Recalque Adotado (Nominal):</span> <strong>{{ resultados.dr_nominal }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Ø Sucção Adotado (Nominal):</span> <strong>{{ resultados.ds_nominal }}</strong></li>
+                </ul>
+            </div>
+            
+            <div class="card text-center results-highlight mb-3">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="bi bi-speedometer2"></i> Altura Manométrica Total</h3>
+                    <p class="display-4 fw-bold">{{ resultados.h_man_total_m|floatformat:2 }} m.c.a.</p>
+                    <hr>
+                    <h3 class="card-title"><i class="bi bi-plug-fill"></i> Potência Recomendada</h3>
+                    <p class="display-5 fw-bold">{{ resultados.potencia_comercial_cv }} CV</p>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <a href="{% url 'relatorio' %}" target="_blank" class="btn btn-success">
+                    <i class="bi bi-file-earmark-text-fill"></i> Gerar Memorial de Cálculo Detalhado
+                </a>
+            </div>
+
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-droplet-half" style="font-size: 5rem; color: #0d6efd;"></i>
+                    <h5 class="card-title mt-3">RecalqueCalc</h5>
+                    <p class="card-text text-muted">
+                        Preencha os dados nas guias à esquerda para dimensionar seu sistema de bombeamento. Os resultados aparecerão aqui.
+                    </p>
+                    <hr>
+                    <p class="small">
+                        Para gerenciar o catálogo de materiais, peças e tubulações, utilize o menu "Catálogos" na barra de navegação superior.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    const calcForm = document.getElementById('calcForm');
+    if (calcForm) {
+        const submitButton = calcForm.querySelector('button[type="submit"]');
+        calcForm.addEventListener('submit', function() {
+            // Pequeno delay para dar tempo do navegador abrir a nova aba antes de desabilitar
+            setTimeout(function () {
+                submitButton.disabled = true;
+                submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Calculando...`;
+            }, 50);
+
+            // Reabilita o botão depois de um tempo para o caso do usuário voltar para a aba
+            setTimeout(function () {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Dimensionar Sistema';
+            }, 4000); // 4 segundos
+        });
+    }
+
+    // Lógica para os botões de tipo de sucção
+    const suctionButtons = document.querySelectorAll('[data-suction-type]');
+    const suctionInput = document.getElementById('tipo_succao_input');
+
+    // Função para definir o estado ativo
+    function setActiveSuctionButton(type) {
+        suctionButtons.forEach(btn => {
+            if (btn.dataset.suctionType === type) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        suctionInput.value = type;
+    }
+
+    // Adiciona o evento de clique a cada botão
+    suctionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const type = button.dataset.suctionType;
+            setActiveSuctionButton(type);
+        });
+    });
+
+    // Garante que o botão correto esteja ativo ao carregar a página
+    // (para manter o estado após o cálculo)
+    document.addEventListener('DOMContentLoaded', () => {
+        setActiveSuctionButton(suctionInput.value);
+    });
+</script>
 {% endblock %}
