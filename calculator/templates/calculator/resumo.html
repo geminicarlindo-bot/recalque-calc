@@ -1,0 +1,39 @@
+{% extends "calculator/base.html" %}
+
+{% block title %}Resumo do Dimensionamento - RecalqueCalc{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+    <h1 class="display-5 mt-3">Cálculo Concluído!</h1>
+    <p class="lead text-muted">Abaixo estão os resultados principais do seu dimensionamento.</p>
+
+    <div class="row mt-4 justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-primary"><i class="bi bi-speedometer2"></i> Altura Manométrica Total</h3>
+                    <p class="display-4 fw-bold my-3">{{ resultados.h_man_total_m|floatformat:2 }} <span class="fs-4 text-muted">m.c.a.</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-primary"><i class="bi bi-plug-fill"></i> Potência Recomendada</h3>
+                    <p class="display-4 fw-bold my-3">{{ resultados.potencia_comercial_cv }} <span class="fs-4 text-muted">CV</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <p>Para ver o passo a passo e todos os detalhes do cálculo, gere o memorial completo.</p>
+        <a href="{% url 'relatorio' %}" target="_blank" class="btn btn-success btn-lg">
+            <i class="bi bi-file-earmark-text-fill"></i> Gerar Memorial de Cálculo Detalhado
+        </a>
+    </div>
+
+</div>
+{% endblock %}

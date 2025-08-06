@@ -4,10 +4,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Rotas existentes
-    path('', views.calculadora_view, name='calculadora'),
-    # Renomeamos a rota para o relatório
-    path('relatorio/', views.resultado_view, name='relatorio'),
 
     # Rotas para o CRUD de Materiais
     path('catalog/materiais/', views.MaterialListView.as_view(), name='material_list'),
@@ -32,6 +28,19 @@ urlpatterns = [
 
     path('meus-projetos/', views.ProjectListView.as_view(), name='project_list'),
     path('projetos/<int:pk>/', views.ProjectDetailView.as_view(), name='project_detail'),
+
+    # ETAPA 1 (GET): Mostra o formulário inicial
+    path('', views.calculadora_view, name='calculadora'),
+    
+    # ETAPA 1 (POST): Processa os dados iniciais e mostra o formulário da etapa 2
+    path('calcular-etapa-1/', views.calcular_etapa1_view, name='calcular_etapa1'),
+    
+    # ETAPA 2 (POST): Processa todos os dados e redireciona para o relatório
+    path('calcular-etapa-2/', views.calcular_etapa2_view, name='calcular_etapa2'),
+    
+    # Página final do relatório
+    path('relatorio/', views.resultado_view, name='relatorio'),
+    path('resumo/', views.resumo_view, name='resumo'),
 
 
 ]
