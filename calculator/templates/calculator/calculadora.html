@@ -44,6 +44,21 @@
                                     <input type="number" id="id_rendimento" step="0.01" min="0.1" max="1.0" name="rendimento_bomba" class="form-control" required value="{{ dados_entrada.rendimento_bomba|default:0.5 }}">
                                 </div>
                             </fieldset>
+                            {% if user.is_authenticated %}
+                            <fieldset class="border-0 p-0 mt-3">
+                                <legend class="fs-6 text-primary">Salvar Projeto</legend>
+                                <div class="mb-3">
+                                    <label for="id_nome_projeto" class="form-label">Nome do Projeto:</label>
+                                    <input type="text" id="id_nome_projeto" name="nome_do_projeto" class="form-control" 
+                                        value="{{ dados_entrada.nome_do_projeto }}" 
+                                        placeholder="Ex: Bombeamento Sítio A">
+                                </div>
+                            </fieldset>
+                            {% else %}
+                            <div class="alert alert-info mt-3">
+                                <a href="{% url 'login' %}">Faça login</a> para salvar seus projetos.
+                            </div>
+                            {% endif %}
                             <fieldset class="border-0 p-0">
                                 <legend class="fs-6 text-primary">Material da Tubulação</legend>
                                 <select name="material" class="form-select" required>

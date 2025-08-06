@@ -1,0 +1,44 @@
+{% extends "calculator/base.html" %}
+
+{% block title %}Meus Projetos - RecalqueCalc{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-collection-fill"></i> Meus Projetos Salvos</h2>
+    <a href="{% url 'calculadora' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Fazer Novo Dimensionamento
+    </a>
+</div>
+
+{% if projetos %}
+    <div class="row g-3">
+        {% for projeto in projetos %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ projeto.nome_do_projeto }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted small">
+                        Criado em: {{ projeto.data_criacao|date:"d/m/Y H:i" }}
+                    </h6>
+                    <ul class="list-unstyled mt-3 small flex-grow-1">
+                        <li><strong>Vazão:</strong> {{ projeto.q_m3_h|floatformat:2 }} m³/h</li>
+                        <li><strong>AMT:</strong> {{ projeto.h_man_total_m|floatformat:2 }} m.c.a.</li>
+                        <li><strong>Potência:</strong> {{ projeto.potencia_comercial_cv }} CV</li>
+                    </ul>
+                    <a href="{% url 'project_detail' projeto.pk %}" class="btn btn-outline-primary mt-2">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-folder-x" style="font-size: 4rem; color: #6c757d;"></i>
+        <h4 class="mt-3">Nenhum projeto salvo ainda.</h4>
+        <p class="text-muted">
+            Vá para a <a href="{% url 'calculadora' %}">página da calculadora</a> para fazer seu primeiro dimensionamento e salvá-lo.
+        </p>
+    </div>
+{% endif %}
+
+{% endblock %}

@@ -1,5 +1,7 @@
 # calculator/models.py
 from django.db import models
+from django.contrib.auth.models import User # <-- IMPORTE O MODELO DE USUÁRIO
+
 
 class Material(models.Model):
     nome = models.CharField(max_length=100, unique=True, help_text="Ex: PVC Soldável, Aço Carbono")
@@ -44,3 +46,42 @@ class ComprimentoEquivalente(models.Model):
 
     def __str__(self):
         return f"Leq para '{self.peca.nome}' em '{self.tubulacao}' é {self.comprimento_m}m"
+
+class Projeto(models.Model):
+    # RELACIONAMENTOS
+    # Link para o usuário que criou o projeto. Se o usuário for deletado, seus projetos também serão.
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    material = models.ForeignKey(Material, on_delete=models.SET_NULL, null=True)
+
+    # DADOS BÁSICOS DO PROJETO
+    nome_do_projeto = models.CharField(max_length=200)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    # PARÂMETROS DE ENTRADA (uma cópia de tudo que o usuário inseriu)
+    consumo_diario_litros = models.FloatField()
+    horas_funcionamento = models.FloatField()
+    rendimento_bomba = models.FloatField()
+    tipo_succao = models.CharField(max_length=10)
+    
+    altura_geo_suc_m = models.FloatField()
+    comp_real_suc_m = models.FloatField()
+    
+    altura_geo_rec_m = models.FloatField()
+    comp_real_rec_m = models.FloatField()
+    
+    # Usamos JSONField para guardar o dicionário de peças de forma flexível
+    pecas_suc = models.JSONField(default=dict)
+    pecas_rec = models.JSONField(default=dict)
+
+    # PRINCIPAIS RESULTADOS (uma cópia dos resultados mais importantes)
+    q_m3_h = models.FloatField()
+    dr_nominal = models.CharField(max_length=50)
+    ds_nominal = models.CharField(max_length=50)
+    h_man_total_m = models.FloatField()
+    potencia_comercial_cv = models.FloatField()
+
+    def __str__(self):
+        return f"'{self.nome_do_projeto}' por {self.user.username}"
+
+    class Meta:
+        ordering = ['-data_criacao'] # Projetos mais recentes primeiro

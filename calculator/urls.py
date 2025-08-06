@@ -30,4 +30,8 @@ urlpatterns = [
     path('catalog/leq/<int:pk>/deletar/', views.ComprimentoEquivalenteDeleteView.as_view(), name='leq_delete'),
     path('catalog/pecas/<int:pk>/editar-leqs/', views.gerenciar_leqs_por_peca, name='leq_bulk_edit'),
 
+    path('meus-projetos/', views.ProjectListView.as_view(), name='project_list'),
+    path('projetos/<int:pk>/', views.ProjectDetailView.as_view(), name='project_detail'),
+
+
 ]

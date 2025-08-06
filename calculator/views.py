@@ -1,10 +1,11 @@
 # calculator/views.py
 
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms import inlineformset_factory
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from .models import Material, Peca, Tubulacao, ComprimentoEquivalente
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView # Adicione DetailView
+from .models import Material, Peca, Tubulacao, ComprimentoEquivalente, Projeto
 from .engine import dimensionar_sistema_completo
 
 
@@ -65,6 +66,38 @@ def calculadora_view(request):
             # request.POST já é um dicionário serializável, então está ok
             # Para garantir, convertemos para um dict padrão
             request.session['report_inputs'] = dict(request.POST.lists())
+            nome_projeto = request.POST.get('nome_do_projeto', '').strip()
+            
+            # Só salva se o usuário estiver logado E tiver dado um nome ao projeto
+            if request.user.is_authenticated and nome_projeto:
+                # Busca a instância do material para salvar a referência
+                material_obj = Material.objects.get(pk=dados_calculo['material_id'])
+
+                Projeto.objects.create(
+                    user=request.user,
+                    material=material_obj,
+                    nome_do_projeto=nome_projeto,
+                    # Salvando os dados de entrada
+                    consumo_diario_litros=dados_calculo['consumo_diario_litros'],
+                    horas_funcionamento=dados_calculo['horas_funcionamento'],
+                    rendimento_bomba=dados_calculo['rendimento_bomba'],
+                    tipo_succao=dados_calculo['tipo_succao'],
+                    altura_geo_suc_m=dados_calculo['altura_geo_suc_m'],
+                    comp_real_suc_m=dados_calculo['comp_real_suc_m'],
+                    altura_geo_rec_m=dados_calculo['altura_geo_rec_m'],
+                    comp_real_rec_m=dados_calculo['comp_real_rec_m'],
+                    pecas_suc=dados_calculo['pecas_suc'],
+                    pecas_rec=dados_calculo['pecas_rec'],
+                    # Salvando os resultados principais
+                    q_m3_h=resultados['q_m3_h'],
+                    dr_nominal=resultados['dr_nominal'],
+                    ds_nominal=resultados['ds_nominal'],
+                    h_man_total_m=resultados['h_man_total_m'],
+                    potencia_comercial_cv=resultados['potencia_comercial_cv'],
+                )
+                # Adiciona uma mensagem de sucesso (opcional, mas recomendado)
+                from django.contrib import messages
+                messages.success(request, f"Projeto '{nome_projeto}' salvo com sucesso!")
 
         except (ValueError, TypeError, ZeroDivisionError) as e:
             context['error_message'] = f"Erro nos dados de entrada. Verifique os valores e tente novamente. (Detalhe: {e})"
@@ -226,3 +259,28 @@ def gerenciar_leqs_por_peca(request, pk):
         'peca': peca
     }
     return render(request, 'calculator/leq_por_peca_form.html', context)
+
+class ProjectListView(LoginRequiredMixin, ListView):
+    model = Projeto
+    template_name = 'calculator/project_list.html'
+    context_object_name = 'projetos'
+
+    def get_queryset(self):
+        """
+        Esta função é a chave: ela sobrescreve o comportamento padrão
+        para retornar apenas os projetos do usuário logado.
+        """
+        return Projeto.objects.filter(user=self.request.user).order_by('-data_criacao')
+
+class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Projeto
+    template_name = 'calculator/project_detail.html'
+    context_object_name = 'projeto' # O nome do objeto no template
+
+    def test_func(self):
+        """
+        Função de segurança: Garante que o usuário que está tentando ver o projeto
+        é o mesmo que o criou.
+        """
+        projeto = self.get_object()
+        return self.request.user == projeto.user
