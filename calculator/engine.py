@@ -48,6 +48,10 @@ def etapa1_calcular_opcoes_diametro(consumo_diario_litros: float, horas_funciona
 def etapa2_calcular_potencia_e_perdas(dados_completos: dict) -> dict:
     dados_vazao = _calcular_vazao(dados_completos['consumo_diario_litros'], dados_completos['horas_funcionamento'])
     
+    X = dados_completos['horas_funcionamento'] / 24.0
+    diametro_calculado_m = 1.3 * (dados_vazao['q_m3_s']**0.5) * (X)**0.25
+    diametro_calculado_mm = diametro_calculado_m * 1000
+
     tubulacao_recalque_obj = Tubulacao.objects.get(pk=dados_completos['tubulacao_recalque_id_escolhida'])
     tubulacao_succao_obj = Tubulacao.objects.filter(material_id=dados_completos['material_id'], diametro_interno_mm__gt=tubulacao_recalque_obj.diametro_interno_mm).order_by('diametro_interno_mm').first()
     if not tubulacao_succao_obj:
@@ -75,7 +79,8 @@ def etapa2_calcular_potencia_e_perdas(dados_completos: dict) -> dict:
     potencia_calculada_cv = (dados_vazao['q_l_s'] * h_man_total) / (75 * dados_completos['rendimento_bomba'])
     potencia_comercial_cv = next((p for p in POTENCIAS_COMERCIAIS_CV if p >= potencia_calculada_cv), None)
 
-    return {**dados_vazao, 'dr_nominal': tubulacao_recalque_obj.diametro_nominal, 'ds_nominal': tubulacao_succao_obj.diametro_nominal, 'dr_comercial_mm': tubulacao_recalque_obj.diametro_interno_mm, 'ds_comercial_mm': tubulacao_succao_obj.diametro_interno_mm, 'j_suc_m_por_m': j_suc, 'j_rec_m_por_m': j_rec, 'delta_h_suc_m': delta_h_suc, 'delta_h_rec_m': delta_h_rec, 'h_man_suc_m': h_man_suc, 'h_man_rec_m': h_man_rec, 'h_man_total_m': h_man_total, 'h_geo_suc_ajustada': altura_geo_suc_ajustada, 'potencia_calculada_cv': potencia_calculada_cv, 'potencia_comercial_cv': potencia_comercial_cv, 'comp_equiv_suc_m': resultado_leq_suc['total'], 'comp_equiv_rec_m': resultado_leq_rec['total'], 'detalhes_pecas_suc': resultado_leq_suc['detalhes'], 'detalhes_pecas_rec': resultado_leq_rec['detalhes']}
+    return {**dados_vazao, 'dr_nominal': tubulacao_recalque_obj.diametro_nominal, 'ds_nominal': tubulacao_succao_obj.diametro_nominal, 'dr_comercial_mm': tubulacao_recalque_obj.diametro_interno_mm, 'ds_comercial_mm': tubulacao_succao_obj.diametro_interno_mm, 'j_suc_m_por_m': j_suc, 'j_rec_m_por_m': j_rec, 'delta_h_suc_m': delta_h_suc, 'delta_h_rec_m': delta_h_rec, 'h_man_suc_m': h_man_suc, 'h_man_rec_m': h_man_rec, 'h_man_total_m': h_man_total, 'h_geo_suc_ajustada': altura_geo_suc_ajustada, 'potencia_calculada_cv': potencia_calculada_cv, 'potencia_comercial_cv': potencia_comercial_cv, 'comp_equiv_suc_m': resultado_leq_suc['total'], 'comp_equiv_rec_m': resultado_leq_rec['total'], 'detalhes_pecas_suc': resultado_leq_suc['detalhes'], 'detalhes_pecas_rec': resultado_leq_rec['detalhes'], 'X_factor': X,
+        'dr_calculado_mm': diametro_calculado_mm,}
 
 
 def _calcular_leq_total(tubulacao_obj: Tubulacao, pecas_quantidades: dict) -> dict:

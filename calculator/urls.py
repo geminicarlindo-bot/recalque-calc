@@ -40,4 +40,7 @@ urlpatterns = [
     path('bombas/nova/', views.BombaCreateView.as_view(), name='bomba_create'),
     path('bombas/<int:pk>/editar/', views.BombaUpdateView.as_view(), name='bomba_update'),
     path('bombas/<int:pk>/deletar/', views.BombaDeleteView.as_view(), name='bomba_delete'),
+
+    # path('relatorio/grafico/', views.grafico_view, name='grafico'),
+
 ]

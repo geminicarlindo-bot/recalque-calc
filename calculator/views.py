@@ -136,20 +136,6 @@ def resultado_view(request):
     }
     return render(request, 'calculator/relatorio.html', context)
 
-def resultado_view(request):
-    """Exibe o relatório final com os resultados."""
-    resultados = request.session.get('report_results', None)
-    dados_entrada = request.session.get('report_inputs', None)
-    
-    if not resultados:
-        messages.warning(request, "Não há resultados para exibir. Faça um cálculo primeiro.")
-        return redirect('calculadora')
-    
-    context = {
-        'resultados': resultados, 
-        'dados_entrada': dados_entrada
-    }
-    return render(request, 'calculator/relatorio.html', context)
 
 # [RESTO DAS VIEWS PERMANECE IGUAL...]
 class MaterialListView(LoginRequiredMixin, ListView):
