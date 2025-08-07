@@ -96,7 +96,17 @@
                             </div>
                         </div>
                     </fieldset>
-                    
+                    <fieldset class="mb-3">
+                        <legend class="fs-6 text-primary">Seleção da Bomba</legend>
+                        <select name="bomba_id" class="form-select" required>
+                            <option value="">--- Escolha uma bomba cadastrada ---</option>
+                            {% for bomba in bombas_usuario %}
+                                <option value="{{ bomba.id }}" {% if dados_entrada.bomba_id == bomba.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ bomba }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </fieldset>
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                          <li class="nav-item" role="presentation"><button class="nav-link active" id="succao-tab" data-bs-toggle="tab" data-bs-target="#tab-succao" type="button" role="tab">Sucção</button></li>
                          <li class="nav-item" role="presentation"><button class="nav-link" id="recalque-tab" data-bs-toggle="tab" data-bs-target="#tab-recalque" type="button" role="tab">Recalque</button></li>

@@ -1,0 +1,77 @@
+{% extends "calculator/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>{% if object %}Editar Bomba e Curva de Performance{% else %}Adicionar Nova Bomba{% endif %}</h2>
+<hr>
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-12">
+            {{ form|crispy }}
+        </div>
+    </div>
+
+    {% if formset %}
+        <hr>
+        <h4>Pontos da Curva de Performance (Vazão x Altura)</h4>
+        <div class="card bg-light">
+            <div class="card-body">
+                {{ formset.management_form }}
+                
+                <div id="ponto-forms-container">
+                    {% for form_ponto in formset %}
+                        <div class="row align-items-center mb-2 ponto-form">
+                            <div class="col-md-5">{{ form_ponto.vazao_m3h|as_crispy_field }}</div>
+                            <div class="col-md-5">{{ form_ponto.altura_m|as_crispy_field }}</div>
+                            <div class="col-md-2">
+                                {% if form_ponto.instance.pk %}{{ form_ponto.DELETE|as_crispy_field }}{% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" id="add-ponto-form" class="btn btn-outline-primary mt-2">
+                    <i class="bi bi-plus-circle"></i> Adicionar Ponto
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-success mt-3">Salvar</button>
+    <a href="{% url 'bomba_list' %}" class="btn btn-secondary mt-3">Cancelar</a>
+</form>
+
+{% if formset %}
+<div id="empty-form-template" style="display: none;">
+    <div class="row align-items-center mb-2 ponto-form">
+        <div class="col-md-5">{{ formset.empty_form.vazao_m3h|as_crispy_field }}</div>
+        <div class="col-md-5">{{ formset.empty_form.altura_m|as_crispy_field }}</div>
+        <div class="col-md-2">{{ formset.empty_form.DELETE|as_crispy_field }}</div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Este script agora só tentará rodar se o botão 'add-ponto-form' existir
+    const addFormBtn = document.getElementById('add-ponto-form');
+    if (addFormBtn) {
+        const container = document.getElementById('ponto-forms-container');
+        const totalFormsInput = document.querySelector('#id_pontos_da_curva-TOTAL_FORMS');
+        const emptyFormHtml = document.getElementById('empty-form-template').innerHTML;
+
+        addFormBtn.addEventListener('click', function() {
+            let formNum = parseInt(totalFormsInput.value);
+            const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formNum);
+            container.insertAdjacentHTML('beforeend', newFormHtml);
+            totalFormsInput.value = formNum + 1;
+        });
+    }
+});
+</script>
+{% endblock %}

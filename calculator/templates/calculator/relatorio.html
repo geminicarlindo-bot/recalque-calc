@@ -111,4 +111,96 @@
         {% endif %}
     </div>
 </div>
+
+{% if dados_grafico %}
+    <hr class="my-4">
+    <h3 class="text-primary mt-4">7. Análise Gráfica: Curva da Bomba vs. Curva do Sistema</h3>
+    <div class="card">
+        <div class="card-body" style="height: 400px;">
+            <canvas id="graficoCurvas"></canvas>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if dados_grafico %}
+    {{ dados_grafico|json_script:"graph-data" }}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const graphDataElement = document.getElementById('graph-data');
+        if (!graphDataElement) return;
+
+        const graphData = JSON.parse(graphDataElement.textContent);
+        const ctx = document.getElementById('graficoCurvas');
+
+        if (!ctx) return;
+        const chart = new Chart(ctx, {
+            type: 'line', // Tipo de gráfico
+            data: {
+                datasets: [
+                    {
+                        label: 'Curva do Sistema',
+                        data: graphData.curva_sistema, // Pontos (x,y)
+                        borderColor: 'rgb(220, 53, 69)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.5)',
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Curva da Bomba',
+                        data: graphData.curva_bomba, // Pontos (x,y)
+                        borderColor: 'rgb(13, 110, 253)',
+                        backgroundColor: 'rgba(13, 110, 253, 0.5)',
+                        fill: false
+                    },
+                    {
+                        label: 'Ponto de Operação',
+                        data: [graphData.ponto_operacao], // Ponto único
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        backgroundColor: 'rgb(25, 135, 84)',
+                        type: 'scatter'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                parsing: {
+                    xAxisKey: 'x',
+                    yAxisKey: 'y'
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: 'Vazão (m³/h)' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Altura Manométrica (m.c.a.)' },
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += `(${context.parsed.x.toFixed(2)} m³/h, ${context.parsed.y.toFixed(2)} m)`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
+{% endif %}
 {% endblock %}

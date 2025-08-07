@@ -10,32 +10,40 @@ from django.http import HttpResponse
 from .engine import etapa1_calcular_opcoes_diametro, etapa2_calcular_potencia_e_perdas
 
 from .models import Material, Peca, Tubulacao, ComprimentoEquivalente, Projeto
-from .engine import etapa1_calcular_opcoes_diametro, etapa2_calcular_potencia_e_perdas
+from .engine import etapa1_calcular_opcoes_diametro, etapa2_calcular_potencia_e_perdas, gerar_dados_grafico
+from .models import Bomba, PontoCurvaBomba
+
+
 
 def calculadora_view(request):
-    """ETAPA 1 (GET): Exibe o formulário inicial para cálculo do diâmetro."""
+    """ETAPA 1 (GET): Exibe o formulário inicial."""
     context = {
         'materiais': Material.objects.all(),
-        'stage': 'etapa1_diametro', # Sinaliza ao template qual formulário mostrar
+        'stage': 'etapa1_diametro',
     }
     # Se uma submissão anterior falhou, repopulamos o formulário
     if 'dados_entrada' in request.session:
         context['dados_entrada'] = request.session.pop('dados_entrada')
-        
     return render(request, 'calculator/calculadora.html', context)
 
 def calcular_etapa1_view(request):
-    """ETAPA 1 (POST): Recebe dados iniciais, calcula opções de diâmetro e exibe o formulário da etapa 2."""
+    """ETAPA 1 (POST): Recebe dados iniciais, calcula opções e exibe formulário da etapa 2."""
     if request.method != 'POST':
         return redirect('calculadora')
+    
+    # Salva os dados na sessão para repopular o formulário em caso de erro
+    request.session['dados_entrada'] = dict(request.POST.items())
 
     context = {
         'materiais': Material.objects.all(),
         'pecas': Peca.objects.all(),
-        'dados_entrada': request.POST, # Passa os dados de volta para repopular
-        'stage': 'etapa2_potencia', # Sinaliza para mostrar a segunda parte do formulário
+        'dados_entrada': request.POST,
+        'stage': 'etapa2_potencia',
     }
-    
+
+    if request.user.is_authenticated:
+        context['bombas_usuario'] = Bomba.objects.filter(user=request.user)
+
     try:
         consumo = float(request.POST.get('consumo_diario_litros'))
         horas = float(request.POST.get('horas_funcionamento'))
@@ -46,20 +54,19 @@ def calcular_etapa1_view(request):
 
     except (ValueError, TypeError, ZeroDivisionError, KeyError) as e:
         messages.error(request, f"Erro ao calcular diâmetros. Verifique os dados de entrada. (Detalhe: {e})")
-        request.session['dados_entrada'] = request.POST # Salva os dados para repopular o form
         return redirect('calculadora')
         
     return render(request, 'calculator/calculadora.html', context)
 
 def calcular_etapa2_view(request):
-    """ETAPA 2 (POST): Recebe todos os dados, faz o cálculo final e redireciona para o relatório."""
+    """ETAPA 2 (POST): Recebe TODOS os dados, faz o cálculo final e redireciona."""
     if request.method != 'POST':
         return redirect('calculadora')
 
     try:
         pecas_qs = Peca.objects.all()
-        pecas_suc = {p.id: int(request.POST.get(f'peca_suc_{p.id}', 0)) for p in pecas_qs if request.POST.get(f'peca_suc_{p.id}')}
-        pecas_rec = {p.id: int(request.POST.get(f'peca_rec_{p.id}', 0)) for p in pecas_qs if request.POST.get(f'peca_rec_{p.id}')}
+        pecas_suc = {p.id: int(request.POST.get(f'peca_suc_{p.id}', 0)) for p in pecas_qs if request.POST.get(f'peca_suc_{p.id}', '0').strip() not in ['', '0']}
+        pecas_rec = {p.id: int(request.POST.get(f'peca_rec_{p.id}', 0)) for p in pecas_qs if request.POST.get(f'peca_rec_{p.id}', '0').strip() not in ['', '0']}
         
         dados_completos = {
             "consumo_diario_litros": float(request.POST.get('consumo_diario_litros')),
@@ -72,24 +79,33 @@ def calcular_etapa2_view(request):
             "material_id": int(request.POST.get('material')),
             "tipo_succao": request.POST.get('tipo_succao', 'negativa'),
             "pecas_suc": pecas_suc, "pecas_rec": pecas_rec,
-            "tubulacao_recalque_id_escolhida": int(request.POST.get('tubulacao_recalque_id_escolhida'))
+            "tubulacao_recalque_id_escolhida": int(request.POST.get('tubulacao_recalque_id_escolhida')),
+            "bomba_id": int(request.POST.get('bomba_id')) if request.POST.get('bomba_id') else None,
         }
         resultados = etapa2_calcular_potencia_e_perdas(dados_completos)
         
+        dados_grafico = None
+        if dados_completos.get('bomba_id'):
+            try:
+                dados_grafico = gerar_dados_grafico(dados_completos)
+            except Exception as e:
+                messages.warning(request, f"Cálculo concluído, mas não foi possível gerar o gráfico: {e}")
+        
         request.session['report_results'] = resultados
         request.session['report_inputs'] = dict(request.POST.lists())
+        request.session['report_graph_data'] = dados_grafico
         
         nome_projeto = request.POST.get('nome_do_projeto', '').strip()
         if request.user.is_authenticated and nome_projeto:
-            # Sua lógica para salvar o projeto aqui
+            # Sua lógica de salvar projeto aqui
             pass
             
     except (ValueError, TypeError, ZeroDivisionError, KeyError) as e:
         messages.error(request, f"Erro no cálculo final. Verifique se todos os campos foram preenchidos. (Detalhe: {e})")
-        request.session['dados_entrada'] = request.POST
+        request.session['dados_entrada'] = dict(request.POST.items())
         return redirect('calculadora')
         
-    return redirect('resumo')
+    return redirect('resumo') # Redireciona para o resumo
 
 def resumo_view(request):
     """
@@ -110,10 +126,14 @@ def resumo_view(request):
     return render(request, 'calculator/resumo.html', context)
 
 def resultado_view(request):
-    # Esta view continua igual
     resultados = request.session.pop('report_results', None)
     dados_entrada = request.session.pop('report_inputs', None)
-    context = {'resultados': resultados, 'dados_entrada': dados_entrada}
+    dados_grafico = request.session.pop('report_graph_data', None) # <-- Pega os dados do gráfico
+    context = {
+        'resultados': resultados,
+        'dados_entrada': dados_entrada,
+        'dados_grafico': dados_grafico # <-- Passa para o template
+    }
     return render(request, 'calculator/relatorio.html', context)
 
 def resultado_view(request):
@@ -270,3 +290,72 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def test_func(self):
         projeto = self.get_object()
         return self.request.user == projeto.user
+
+
+class BombaListView(LoginRequiredMixin, ListView):
+    model = Bomba
+    template_name = 'calculator/bomba_list.html'
+    context_object_name = 'bombas'
+
+    def get_queryset(self):
+        # Filtra as bombas para mostrar apenas as do usuário logado
+        return Bomba.objects.filter(user=self.request.user)
+
+class BombaCreateView(LoginRequiredMixin, CreateView):
+    model = Bomba
+    template_name = 'calculator/bomba_form.html'
+    fields = ['fabricante', 'modelo']
+    success_url = reverse_lazy('bomba_list')
+
+    def form_valid(self, form):
+        # Associa a bomba recém-criada ao usuário logado
+        form.instance.user = self.request.user
+        messages.success(self.request, "Bomba cadastrada com sucesso!")
+        return super().form_valid(form)
+
+class BombaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Bomba
+    template_name = 'calculator/bomba_form.html'
+    fields = ['fabricante', 'modelo']
+    success_url = reverse_lazy('bomba_list')
+
+    def test_func(self):
+        # Garante que o usuário só pode editar suas próprias bombas
+        bomba = self.get_object()
+        return self.request.user == bomba.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        PontoCurvaFormSet = inlineformset_factory(
+            Bomba, PontoCurvaBomba,
+            fields=('vazao_m3h', 'altura_m'),
+            extra=1, # Garante que sempre teremos pelo menos um campo extra
+            can_delete=True
+        )
+        if self.request.POST:
+            context['formset'] = PontoCurvaFormSet(self.request.POST, instance=self.object)
+        else:
+            context['formset'] = PontoCurvaFormSet(instance=self.object)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            formset.instance = self.object
+            formset.save()
+            messages.success(self.request, "Bomba e sua curva de performance foram atualizadas com sucesso!")
+            return redirect(self.get_success_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+class BombaDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Bomba
+    template_name = 'calculator/bomba_confirm_delete.html'
+    success_url = reverse_lazy('bomba_list')
+    
+    def test_func(self):
+        # Garante que o usuário só pode deletar suas próprias bombas
+        bomba = self.get_object()
+        return self.request.user == bomba.user

@@ -85,3 +85,37 @@ class Projeto(models.Model):
 
     class Meta:
         ordering = ['-data_criacao'] # Projetos mais recentes primeiro
+
+class Bomba(models.Model):
+    """
+    Representa uma bomba específica, com fabricante e modelo.
+    Cada usuário cadastrará suas próprias bombas.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="Usuário proprietário desta bomba")
+    fabricante = models.CharField(max_length=100, help_text="Ex: KSB, Grundfos, Dancor")
+    modelo = models.CharField(max_length=100, help_text="Ex: Submersa KRT BIO 50-160/152")
+
+    def __str__(self):
+        return f"{self.fabricante} - {self.modelo}"
+
+    class Meta:
+        # Garante que o mesmo usuário não cadastre a mesma bomba duas vezes
+        unique_together = ('user', 'fabricante', 'modelo')
+        ordering = ['fabricante', 'modelo']
+
+class PontoCurvaBomba(models.Model):
+    """
+    Representa um único ponto (Vazão x Altura) da curva de performance de uma bomba.
+    """
+    bomba = models.ForeignKey(Bomba, on_delete=models.CASCADE, related_name='pontos_da_curva')
+    vazao_m3h = models.FloatField(help_text="Ponto de vazão (Q) em m³/h")
+    altura_m = models.FloatField(help_text="Ponto de altura manométrica (H) em m.c.a.")
+
+    def __str__(self):
+        return f"Ponto ({self.vazao_m3h} m³/h, {self.altura_m} m) para {self.bomba}"
+
+    class Meta:
+        # Ordena os pontos pela vazão, para facilitar a plotagem do gráfico
+        ordering = ['vazao_m3h']
+        # Garante que não haja duas alturas para a mesma vazão na mesma bomba
+        unique_together = ('bomba', 'vazao_m3h')

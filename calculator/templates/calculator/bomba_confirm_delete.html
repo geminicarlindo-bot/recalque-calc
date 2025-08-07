@@ -1,0 +1,12 @@
+{% extends "calculator/base.html" %}
+
+{% block content %}
+<h2>Confirmar Exclusão</h2>
+<p>Você tem certeza que deseja deletar a bomba "<strong>{{ object }}</strong>"?</p>
+<p class="text-danger">Esta ação não pode ser desfeita e irá deletar todos os pontos da curva associados a esta bomba.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sim, tenho certeza</button>
+    <a href="{% url 'bomba_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
