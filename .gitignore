@@ -1,11 +1,9 @@
-# .gitignore
-
-# Ignorar banco de dados local
+# Banco de dados local
 db.sqlite3
 
-# Ignorar arquivos de cache do Python
+# Cache do Python
 __pycache__/
 *.pyc
 
-# Ignorar ambiente virtual
+# Ambiente Virtual
 venv/
