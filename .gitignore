@@ -1,9 +1,6 @@
-# Banco de dados local
-db.sqlite3
-
-# Cache do Python
-__pycache__/
+# .gitignore
 *.pyc
-
-# Ambiente Virtual
+__pycache__/
 venv/
+db.sqlite3
+.env
