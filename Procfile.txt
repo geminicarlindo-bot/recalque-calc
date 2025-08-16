@@ -1,1 +1,1 @@
-web: python -m gunicorn -c gunicorn.conf.py recalque_calc.wsgi
+web: python -m gunicorn -c gunicorn.conf.py recalque_core.wsgi
