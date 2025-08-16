@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Meu Catálogo de Bombas</h2>
-    <a href="{% url 'bomba_create' %}" class="btn btn-primary">
+    <a href="{% url 'calculator:bomba_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Adicionar Nova Bomba
     </a>
 </div>
@@ -19,10 +19,10 @@
                     <td>{{ bomba.fabricante }}</td>
                     <td>{{ bomba.modelo }}</td>
                     <td>
-                        <a href="{% url 'bomba_update' bomba.pk %}" class="btn btn-sm btn-primary">
+                        <a href="{% url 'calculator:bomba_update' bomba.pk %}" class="btn btn-sm btn-primary">
                             <i class="bi bi-pencil-fill"></i> Editar / Ver Curva
                         </a>
-                        <a href="{% url 'bomba_delete' bomba.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
+                        <a href="{% url 'calculator:bomba_delete' bomba.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
                     </td>
                 </tr>
                 {% empty %}

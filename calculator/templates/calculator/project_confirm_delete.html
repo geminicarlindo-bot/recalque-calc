@@ -7,6 +7,6 @@
 <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Sim, tenho certeza</button>
-    <a href="{% url 'project_detail' object.pk %}" class="btn btn-secondary">Cancelar</a>
+    <a href="{% url ''calculator:project_detail' object.pk %}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}

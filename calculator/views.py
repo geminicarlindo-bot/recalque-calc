@@ -12,8 +12,22 @@ from .engine import etapa1_calcular_opcoes_diametro, etapa2_calcular_potencia_e_
 from .models import Material, Peca, Tubulacao, ComprimentoEquivalente, Projeto
 from .engine import etapa1_calcular_opcoes_diametro, etapa2_calcular_potencia_e_perdas, gerar_dados_grafico
 from .models import Bomba, PontoCurvaBomba
+from django.contrib.auth import login
+from .forms import CustomUserCreationForm # Importa nosso formulário customizado
 
+def registro_view(request):
+    if request.method == 'POST':
+        # Use o nosso formulário customizado aqui
+        form = CustomUserCreationForm(request.POST) 
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('calculator:project_list')
+    else:
+        # E aqui também
+        form = CustomUserCreationForm()
 
+    return render(request, 'registration/registro.html', {'form': form})
 
 def calculadora_view(request):
     """ETAPA 1 (GET): Exibe o formulário inicial."""
@@ -29,7 +43,7 @@ def calculadora_view(request):
 def calcular_etapa1_view(request):
     """ETAPA 1 (POST): Recebe dados iniciais, calcula opções e exibe formulário da etapa 2."""
     if request.method != 'POST':
-        return redirect('calculadora')
+        return redirect('calculator:calculadora')
     
     # Salva os dados na sessão para repopular o formulário em caso de erro
     request.session['dados_entrada'] = dict(request.POST.items())
@@ -54,14 +68,14 @@ def calcular_etapa1_view(request):
 
     except (ValueError, TypeError, ZeroDivisionError, KeyError) as e:
         messages.error(request, f"Erro ao calcular diâmetros. Verifique os dados de entrada. (Detalhe: {e})")
-        return redirect('calculadora')
+        return redirect('calculator:calculadora')
         
     return render(request, 'calculator/calculadora.html', context)
 
 def calcular_etapa2_view(request):
     """ETAPA 2 (POST): Recebe TODOS os dados, faz o cálculo final e redireciona."""
     if request.method != 'POST':
-        return redirect('calculadora')
+        return redirect('calculator:calculadora')
 
     try:
         pecas_qs = Peca.objects.all()
@@ -103,9 +117,9 @@ def calcular_etapa2_view(request):
     except (ValueError, TypeError, ZeroDivisionError, KeyError) as e:
         messages.error(request, f"Erro no cálculo final. Verifique se todos os campos foram preenchidos. (Detalhe: {e})")
         request.session['dados_entrada'] = dict(request.POST.items())
-        return redirect('calculadora')
+        return redirect('calculator:calculadora')
         
-    return redirect('resumo') # Redireciona para o resumo
+    return redirect('calculator:resumo') # Redireciona para o resumo
 
 def resumo_view(request):
     """
@@ -118,7 +132,7 @@ def resumo_view(request):
     # Se não houver resultados na sessão, redireciona para a calculadora
     if not resultados:
         messages.warning(request, "Não há resultados para exibir. Por favor, faça um cálculo primeiro.")
-        return redirect('calculadora')
+        return redirect('calculator:calculadora')
 
     context = {
         'resultados': resultados
@@ -147,18 +161,18 @@ class MaterialCreateView(LoginRequiredMixin, CreateView):
     model = Material
     template_name = 'calculator/material_form.html'
     fields = ['nome', 'rugosidade_mm']
-    success_url = reverse_lazy('material_list')
+    success_url = reverse_lazy('calculator:material_list')
 
 class MaterialUpdateView(LoginRequiredMixin, UpdateView):
     model = Material
     template_name = 'calculator/material_form.html'
     fields = ['nome', 'rugosidade_mm']
-    success_url = reverse_lazy('material_list')
+    success_url = reverse_lazy('calculator:material_list')
 
 class MaterialDeleteView(LoginRequiredMixin, DeleteView):
     model = Material
     template_name = 'calculator/material_confirm_delete.html'
-    success_url = reverse_lazy('material_list')
+    success_url = reverse_lazy('calculator:material_list')
 
 class PecaListView(ListView):
     model = Peca
@@ -169,18 +183,18 @@ class PecaCreateView(CreateView):
     model = Peca
     template_name = 'calculator/peca_form.html'
     fields = ['nome', 'descricao']
-    success_url = reverse_lazy('peca_list')
+    success_url = reverse_lazy('calculator:peca_list')
 
 class PecaUpdateView(UpdateView):
     model = Peca
     template_name = 'calculator/peca_form.html'
     fields = ['nome', 'descricao']
-    success_url = reverse_lazy('peca_list')
+    success_url = reverse_lazy('calculator:peca_list')
 
 class PecaDeleteView(DeleteView):
     model = Peca
     template_name = 'calculator/peca_confirm_delete.html'
-    success_url = reverse_lazy('peca_list')
+    success_url = reverse_lazy('calculator:peca_list')
 
 class TubulacaoListView(ListView):
     model = Tubulacao
@@ -192,18 +206,18 @@ class TubulacaoCreateView(CreateView):
     model = Tubulacao
     template_name = 'calculator/tubulacao_form.html'
     fields = ['material', 'diametro_nominal', 'diametro_interno_mm', 'diametro_externo_mm']
-    success_url = reverse_lazy('tubulacao_list')
+    success_url = reverse_lazy('calculator:tubulacao_list')
 
 class TubulacaoUpdateView(UpdateView):
     model = Tubulacao
     template_name = 'calculator/tubulacao_form.html'
     fields = ['material', 'diametro_nominal', 'diametro_interno_mm', 'diametro_externo_mm']
-    success_url = reverse_lazy('tubulacao_list')
+    success_url = reverse_lazy('calculator:tubulacao_list')
 
 class TubulacaoDeleteView(DeleteView):
     model = Tubulacao
     template_name = 'calculator/tubulacao_confirm_delete.html'
-    success_url = reverse_lazy('tubulacao_list')
+    success_url = reverse_lazy('calculator:tubulacao_list')
 
 class ComprimentoEquivalenteListView(ListView):
     model = ComprimentoEquivalente
@@ -215,18 +229,18 @@ class ComprimentoEquivalenteCreateView(CreateView):
     model = ComprimentoEquivalente
     template_name = 'calculator/leq_form.html'
     fields = ['peca', 'tubulacao', 'comprimento_m']
-    success_url = reverse_lazy('leq_list')
+    success_url = reverse_lazy('calculator:leq_list')
 
 class ComprimentoEquivalenteUpdateView(UpdateView):
     model = ComprimentoEquivalente
     template_name = 'calculator/leq_form.html'
     fields = ['peca', 'tubulacao', 'comprimento_m']
-    success_url = reverse_lazy('leq_list')
+    success_url = reverse_lazy('calculator:leq_list')
 
 class ComprimentoEquivalenteDeleteView(DeleteView):
     model = ComprimentoEquivalente
     template_name = 'calculator/leq_confirm_delete.html'
-    success_url = reverse_lazy('leq_list')
+    success_url = reverse_lazy('calculator:leq_list')
 
 def gerenciar_leqs_por_peca(request, pk):
     peca = get_object_or_404(Peca, pk=pk)
@@ -250,7 +264,7 @@ def gerenciar_leqs_por_peca(request, pk):
         formset = LeqFormSet(request.POST, instance=peca)
         if formset.is_valid():
             formset.save()
-            return redirect('peca_list')
+            return redirect('calculator:peca_list')
     else:
         formset = LeqFormSet(instance=peca)
 
@@ -279,28 +293,76 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
 class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Projeto
-    # Reutilizaremos o template da calculadora como um formulário pré-preenchido
-    template_name = 'calculator/calculadora.html' 
-    # Precisamos listar TODOS os campos que podem ser editados
+    # Apontamos para o template da calculadora, como você sugeriu
+    template_name = 'calculator/calculadora.html'
+    # Os campos que o formulário vai gerenciar
     fields = [
         'nome_do_projeto', 'consumo_diario_litros', 'horas_funcionamento', 'rendimento_bomba',
         'material', 'tipo_succao', 'altura_geo_suc_m', 'comp_real_suc_m',
         'altura_geo_rec_m', 'comp_real_rec_m'
     ]
-    
+
     def test_func(self):
-        # Garante que o usuário só pode editar seus próprios projetos
+        """Garante que o usuário só pode editar seus próprios projetos."""
         projeto = self.get_object()
         return self.request.user == projeto.user
 
+    def get_context_data(self, **kwargs):
+        """
+        Prepara o contexto para pré-preencher nosso formulário de duas etapas.
+        """
+        context = super().get_context_data(**kwargs)
+        
+        # Pegamos o projeto que está sendo editado
+        projeto = self.get_object()
+
+        # Montamos um dicionário 'dados_entrada' idêntico ao que o template espera
+        dados_preenchidos = {
+            'consumo_diario_litros': projeto.consumo_diario_litros,
+            'horas_funcionamento': projeto.horas_funcionamento,
+            'material': projeto.material_id,
+            'nome_do_projeto': projeto.nome_do_projeto,
+            'rendimento_bomba': projeto.rendimento_bomba,
+            'tipo_succao': projeto.tipo_succao,
+            'altura_geo_suc_m': projeto.altura_geo_suc_m,
+            'comp_real_suc_m': projeto.comp_real_suc_m,
+            'altura_geo_rec_m': projeto.altura_geo_rec_m,
+            'comp_real_rec_m': projeto.comp_real_rec_m,
+            'pecas_suc': projeto.pecas_suc,
+            'pecas_rec': projeto.pecas_rec,
+        }
+        
+        # Adicionamos os dados ao contexto principal
+        context['dados_entrada'] = dados_preenchidos
+        context['materiais'] = Material.objects.all()
+        context['pecas'] = Peca.objects.all()
+        context['stage'] = 'etapa1_diametro' # Força o formulário a começar na etapa 1
+        context['editing_project'] = True # Um sinalizador para o template
+
+        return context
+
+    def form_valid(self, form):
+        """
+        Esta função é chamada quando o formulário é enviado e válido.
+        Aqui, em vez de salvar, nós redirecionamos para o fluxo de cálculo.
+        """
+        # Em uma implementação futura, poderíamos salvar as mudanças e recalcular.
+        # Por enquanto, vamos manter o fluxo simples: a edição apenas preenche o formulário.
+        # O usuário então fará o cálculo normalmente.
+        messages.info(self.request, "Os dados do projeto foram carregados no formulário. Faça suas alterações e prossiga com o cálculo.")
+        # Esta implementação não salva diretamente, ela prepara para um novo cálculo.
+        # O salvamento ocorrerá na view de cálculo final, como se fosse um novo projeto.
+        return super().form_valid(form)
+
     def get_success_url(self):
-        # Para onde ir após salvar com sucesso? Para a página de detalhes do projeto.
-        return reverse_lazy('project_detail', kwargs={'pk': self.object.pk})
+        """Para onde ir após o form_valid."""
+        # Esta URL não será usada diretamente no nosso fluxo customizado, mas é bom tê-la.
+        return reverse_lazy('calculator:project_detail', kwargs={'pk': self.object.pk})
 
 class ProjectDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Projeto
     template_name = 'calculator/project_confirm_delete.html'
-    success_url = reverse_lazy('project_list') # Para onde ir após deletar
+    success_url = reverse_lazy('calculator:project_list') # Para onde ir após deletar
 
     def test_func(self):
         projeto = self.get_object()
@@ -319,7 +381,7 @@ class BombaCreateView(LoginRequiredMixin, CreateView):
     model = Bomba
     template_name = 'calculator/bomba_form.html'
     fields = ['fabricante', 'modelo']
-    success_url = reverse_lazy('bomba_list')
+    success_url = reverse_lazy('calculator:bomba_list')
 
     def form_valid(self, form):
         # Associa a bomba recém-criada ao usuário logado
@@ -331,7 +393,7 @@ class BombaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Bomba
     template_name = 'calculator/bomba_form.html'
     fields = ['fabricante', 'modelo']
-    success_url = reverse_lazy('bomba_list')
+    success_url = reverse_lazy('calculator:bomba_list')
 
     def test_func(self):
         # Garante que o usuário só pode editar suas próprias bombas
@@ -367,7 +429,7 @@ class BombaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class BombaDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Bomba
     template_name = 'calculator/bomba_confirm_delete.html'
-    success_url = reverse_lazy('bomba_list')
+    success_url = reverse_lazy('calculator:bomba_list')
     
     def test_func(self):
         # Garante que o usuário só pode deletar suas próprias bombas

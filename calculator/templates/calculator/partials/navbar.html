@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
         
-        <a class="navbar-brand" href="{% url 'calculadora' %}">
+            <a class="navbar-brand" href=" {% url 'calculator:calculadora' %} ">
             <i class="bi bi-calculator-fill"></i>
             <strong>RecalqueCalc</strong>
         </a>
@@ -14,11 +14,11 @@
             
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'calculadora' %}">Calculadora</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'calculator:calculadora' %}">Calculadora</a>
                 </li>
                     {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'project_list' %}">Meus Projetos</a>
+                    <a class="nav-link" href="{% url 'calculator:project_list' %}">Meus Projetos</a>
                 </li>
                 {% endif %}
                 
@@ -27,12 +27,12 @@
                         Catálogos
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="{% url 'material_list' %}">Materiais</a></li>
-                        <li><a class="dropdown-item" href="{% url 'peca_list' %}">Peças</a></li>
-                        <li><a class="dropdown-item" href="{% url 'tubulacao_list' %}">Tubulações</a></li>
-                        <li><a class="dropdown-item" href="{% url 'leq_list' %}">Comprimentos Equivalentes</a></li>
+                        <li><a class="dropdown-item" href="{% url 'calculator:material_list' %}">Materiais</a></li>
+                        <li><a class="dropdown-item" href="{% url 'calculator:peca_list' %}">Peças</a></li>
+                        <li><a class="dropdown-item" href="{% url 'calculator:tubulacao_list' %}">Tubulações</a></li>
+                        <li><a class="dropdown-item" href="{% url 'calculator:leq_list' %}">Comprimentos Equivalentes</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{% url 'bomba_list' %}">Minhas Bombas</a></li> ```
+                        <li><a class="dropdown-item" href="{% url 'calculator:bomba_list' %}">Minhas Bombas</a></li> ```
                     </ul>
                 </li>
             </ul>

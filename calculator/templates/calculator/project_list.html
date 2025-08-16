@@ -5,7 +5,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2><i class="bi bi-collection-fill"></i> Meus Projetos Salvos</h2>
-    <a href="{% url 'calculadora' %}" class="btn btn-primary">
+    <a href="{% url 'calculator:calculadora' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Fazer Novo Dimensionamento
     </a>
 </div>
@@ -25,7 +25,7 @@
                         <li><strong>AMT:</strong> {{ projeto.h_man_total_m|floatformat:2 }} m.c.a.</li>
                         <li><strong>Potência:</strong> {{ projeto.potencia_comercial_cv }} CV</li>
                     </ul>
-                    <a href="{% url 'project_detail' projeto.pk %}" class="btn btn-outline-primary mt-2">Ver Detalhes</a>
+                    <a href="{% url 'calculator:project_detail' projeto.pk %}" class="btn btn-outline-primary mt-2">Ver Detalhes</a>
                 </div>
             </div>
         </div>
@@ -36,7 +36,7 @@
         <i class="bi bi-folder-x" style="font-size: 4rem; color: #6c757d;"></i>
         <h4 class="mt-3">Nenhum projeto salvo ainda.</h4>
         <p class="text-muted">
-            Vá para a <a href="{% url 'calculadora' %}">página da calculadora</a> para fazer seu primeiro dimensionamento e salvá-lo.
+            Vá para a <a href="{% url 'calculator:calculadora' %}">página da calculadora</a> para fazer seu primeiro dimensionamento e salvá-lo.
         </p>
     </div>
 {% endif %}

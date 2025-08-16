@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Catálogo de Tubulações</h2>
-    <a href="{% url 'tubulacao_create' %}" class="btn btn-primary">
+    <a href="{% url 'calculator:tubulacao_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Adicionar Nova Tubulação
     </a>
 </div>
@@ -27,8 +27,8 @@
                     <td>{{ tubulacao.diametro_interno_mm }}</td>
                     <td>{{ tubulacao.diametro_externo_mm }}</td>
                     <td>
-                        <a href="{% url 'tubulacao_update' tubulacao.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                        <a href="{% url 'tubulacao_delete' tubulacao.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
+                        <a href="{% url 'calculator:tubulacao_update' tubulacao.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <a href="{% url 'calculator:tubulacao_delete' tubulacao.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
                     </td>
                 </tr>
                 {% empty %}

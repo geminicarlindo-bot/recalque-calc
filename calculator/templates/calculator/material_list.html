@@ -1,7 +1,7 @@
 {% extends "calculator/base.html" %} {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Catálogo de Materiais</h2>
-    <a href="{% url 'material_create' %}" class="btn btn-primary">
+    <a href="{% url 'calculator:material_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Adicionar Novo Material
     </a>
 </div>
@@ -21,8 +21,8 @@
                     <td>{{ material.nome }}</td>
                     <td>{{ material.rugosidade_mm }}</td>
                     <td>
-                        <a href="{% url 'material_update' material.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                        <a href="{% url 'material_delete' material.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
+                        <a href="{% url 'calculator:material_update' material.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <a href="{% url 'calculator:material_delete' material.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
                     </td>
                 </tr>
                 {% empty %}

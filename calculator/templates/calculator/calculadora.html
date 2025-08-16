@@ -16,9 +16,17 @@
                 {% endif %}
             </div>
             <div class="card-body">
+            
+                {% if editing_project %}
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle-fill"></i> 
+                        Você está editando um projeto. Os dados foram pré-preenchidos.
+                        Prossiga com o cálculo para ver os novos resultados ou salvá-los como um novo projeto.
+                    </div>
+                {% endif %}
 
                 {% if stage == 'etapa1_diametro' or not stage %}
-                <form method="post" action="{% url 'calcular_etapa1' %}" id="calcFormStep1">
+                <form method="post" action="{% url 'calculator:calcular_etapa1' %}" id="calcFormStep1">
                     {% csrf_token %}
                     <p class="text-muted">Forneça os dados básicos para encontrar as opções de diâmetro econômico.</p>
                     <fieldset class="border-0 p-0 mb-3">
@@ -52,7 +60,7 @@
                 
 
                 {% if stage == 'etapa2_potencia' %}
-                <form method="post" action="{% url 'calcular_etapa2' %}" id="calcFormStep2" target="_blank">
+                <form method="post" action="{% url 'calculator:calcular_etapa2' %}" id="calcFormStep2" target="_blank">
                     {% csrf_token %}
                     <input type="hidden" name="consumo_diario_litros" value="{{ dados_entrada.consumo_diario_litros }}">
                     <input type="hidden" name="horas_funcionamento" value="{{ dados_entrada.horas_funcionamento }}">

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Catálogo de Peças e Acessórios</h2>
-    <a href="{% url 'peca_create' %}" class="btn btn-primary">
+    <a href="{% url 'calculator:peca_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Adicionar Nova Peça
     </a>
 </div>
@@ -23,13 +23,13 @@
                     <td>{{ peca.nome }}</td>
                     <td>{{ peca.descricao|default:"-" }}</td>
                     <td>
-                        <a href="{% url 'peca_update' peca.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar Nome/Descrição">
+                        <a href="{% url 'calculator:peca_update' peca.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar Nome/Descrição">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a href="{% url 'leq_bulk_edit' peca.pk %}" class="btn btn-sm btn-primary" title="Editar Comprimentos Equivalentes">
+                        <a href="{% url 'calculator:leq_bulk_edit' peca.pk %}" class="btn btn-sm btn-primary" title="Editar Comprimentos Equivalentes">
                             <i class="bi bi-rulers"></i> 
                         </a>
-                        <a href="{% url 'peca_delete' peca.pk %}" class="btn btn-sm btn-outline-danger" title="Deletar Peça">
+                        <a href="{% url 'calculator:peca_delete' peca.pk %}" class="btn btn-sm btn-outline-danger" title="Deletar Peça">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>

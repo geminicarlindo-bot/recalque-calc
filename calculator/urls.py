@@ -2,6 +2,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'calculator'  # <== ESTA LINHA PRECISA ESTAR AQUI
+
 urlpatterns = [
     # FLUXO PRINCIPAL DA CALCULADORA
     path('', views.calculadora_view, name='calculadora'),
@@ -45,5 +47,9 @@ urlpatterns = [
     path('bombas/<int:pk>/deletar/', views.BombaDeleteView.as_view(), name='bomba_delete'),
 
     # path('relatorio/grafico/', views.grafico_view, name='grafico'),
-
+  
+    # Novas URLs para autenticação
+    path('registro/', views.registro_view, name='registro'),
+    # path('login/', views.login_view, name='login'),
+    # path('logout/', views.logout_view, name='logout'),
 ]

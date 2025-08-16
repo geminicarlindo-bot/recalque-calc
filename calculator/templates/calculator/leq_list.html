@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Catálogo de Comprimentos Equivalentes (Leq)</h2>
-    <a href="{% url 'leq_create' %}" class="btn btn-primary">
+    <a href="{% url 'calculator:leq_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Adicionar Novo Leq
     </a>
 </div>
@@ -25,8 +25,8 @@
                     <td>{{ leq.tubulacao }}</td>
                     <td>{{ leq.comprimento_m }}</td>
                     <td>
-                        <a href="{% url 'leq_update' leq.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                        <a href="{% url 'leq_delete' leq.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
+                        <a href="{% url 'calculator:leq_update' leq.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <a href="{% url 'calculator:leq_delete' leq.pk %}" class="btn btn-sm btn-outline-danger">Deletar</a>
                     </td>
                 </tr>
                 {% empty %}

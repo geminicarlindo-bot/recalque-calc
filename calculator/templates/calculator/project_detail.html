@@ -9,12 +9,14 @@
             <h2><i class="bi bi-file-earmark-text-fill"></i> Detalhes do Projeto</h2>
             <h5 class="text-muted">{{ projeto.nome_do_projeto }}</h5>
         </div>
-        <div> <a href="#" class="btn btn-primary d-print-none disabled"> <i class="bi bi-pencil-fill"></i> Editar (em breve)
+        <div>
+        <a href="{% url 'calculator:project_update' projeto.pk %}" class="btn btn-primary d-print-none">
+            <i class="bi bi-pencil-fill"></i> Editar Projeto
         </a>
-        <a href="{% url 'project_delete' projeto.pk %}" class="btn btn-danger d-print-none">
+        <a href="{% url 'calculator:project_delete' projeto.pk %}" class="btn btn-danger d-print-none">
             <i class="bi bi-trash-fill"></i> Deletar
         </a>
-        <a href="{% url 'project_list' %}" class="btn btn-secondary d-print-none ms-2">
+        <a href="{% url 'calculator:project_list' %}" class="btn btn-secondary d-print-none ms-2">
             <i class="bi bi-arrow-left"></i> Voltar
         </a>
     </div>
