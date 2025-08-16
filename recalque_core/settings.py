@@ -122,6 +122,13 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Following settings only applied in production
+if not DEBUG:
+    # Tell Django to use the WhiteNoise storage engine to serve static files
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/'
