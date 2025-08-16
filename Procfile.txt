@@ -1,0 +1,1 @@
+web: gunicorn recalque_calc.wsgi --log-file -
