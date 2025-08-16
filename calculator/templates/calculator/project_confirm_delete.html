@@ -1,0 +1,12 @@
+{% extends "calculator/base.html" %}
+
+{% block content %}
+<h2>Confirmar Exclusão de Projeto</h2>
+<p>Você tem certeza que deseja deletar o projeto "<strong>{{ object.nome_do_projeto }}</strong>"?</p>
+<p class="text-danger">Esta ação não pode ser desfeita.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sim, tenho certeza</button>
+    <a href="{% url 'project_detail' object.pk %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

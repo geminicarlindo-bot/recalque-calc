@@ -277,6 +277,34 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         projeto = self.get_object()
         return self.request.user == projeto.user
 
+class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Projeto
+    # Reutilizaremos o template da calculadora como um formulário pré-preenchido
+    template_name = 'calculator/calculadora.html' 
+    # Precisamos listar TODOS os campos que podem ser editados
+    fields = [
+        'nome_do_projeto', 'consumo_diario_litros', 'horas_funcionamento', 'rendimento_bomba',
+        'material', 'tipo_succao', 'altura_geo_suc_m', 'comp_real_suc_m',
+        'altura_geo_rec_m', 'comp_real_rec_m'
+    ]
+    
+    def test_func(self):
+        # Garante que o usuário só pode editar seus próprios projetos
+        projeto = self.get_object()
+        return self.request.user == projeto.user
+
+    def get_success_url(self):
+        # Para onde ir após salvar com sucesso? Para a página de detalhes do projeto.
+        return reverse_lazy('project_detail', kwargs={'pk': self.object.pk})
+
+class ProjectDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Projeto
+    template_name = 'calculator/project_confirm_delete.html'
+    success_url = reverse_lazy('project_list') # Para onde ir após deletar
+
+    def test_func(self):
+        projeto = self.get_object()
+        return self.request.user == projeto.user
 
 class BombaListView(LoginRequiredMixin, ListView):
     model = Bomba

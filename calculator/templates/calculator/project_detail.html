@@ -9,10 +9,16 @@
             <h2><i class="bi bi-file-earmark-text-fill"></i> Detalhes do Projeto</h2>
             <h5 class="text-muted">{{ projeto.nome_do_projeto }}</h5>
         </div>
-        <a href="{% url 'project_list' %}" class="btn btn-secondary d-print-none">
-            <i class="bi bi-arrow-left"></i> Voltar para Meus Projetos
+        <div> <a href="#" class="btn btn-primary d-print-none disabled"> <i class="bi bi-pencil-fill"></i> Editar (em breve)
+        </a>
+        <a href="{% url 'project_delete' projeto.pk %}" class="btn btn-danger d-print-none">
+            <i class="bi bi-trash-fill"></i> Deletar
+        </a>
+        <a href="{% url 'project_list' %}" class="btn btn-secondary d-print-none ms-2">
+            <i class="bi bi-arrow-left"></i> Voltar
         </a>
     </div>
+</div>
     <div class="card-body">
         <h3 class="text-primary">1. Dados de Entrada</h3>
         <div class="row">

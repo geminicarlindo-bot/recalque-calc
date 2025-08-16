@@ -13,6 +13,9 @@ urlpatterns = [
     # CRUD DE PROJETOS SALVOS
     path('meus-projetos/', views.ProjectListView.as_view(), name='project_list'),
     path('projetos/<int:pk>/', views.ProjectDetailView.as_view(), name='project_detail'),
+    path('projetos/<int:pk>/editar/', views.ProjectUpdateView.as_view(), name='project_update'),
+    path('projetos/<int:pk>/deletar/', views.ProjectDeleteView.as_view(), name='project_delete'),
+   
 
     # CRUD DE CATÁLOGOS
     path('catalog/materiais/', views.MaterialListView.as_view(), name='material_list'),
